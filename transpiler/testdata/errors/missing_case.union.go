@@ -1,5 +1,7 @@
 package main
 
+// This tests to verify the transpiler rejects non-exhaustive switch statements
+
 type atom struct{}
 
 type gender union {

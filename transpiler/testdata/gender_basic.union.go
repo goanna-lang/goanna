@@ -1,5 +1,6 @@
 package main
 
+// TODO: This should be defined by the transpiler as a global type. 
 type atom struct{}
 
 type gender union {
@@ -17,6 +18,7 @@ func main() {
 		gender: Male,
 	}
 
+	// For testing purposes. Each case handled even though nothing is run
 	switch greg.gender.(union) {
 	case Male:
 	case Female:
