@@ -84,15 +84,17 @@ func processFile(input string) error {
 	return os.WriteFile(outPath, out, 0644)
 }
 
-// runBuild handles: gounion build [--keep] [patterns...]
+// runBuild handles: gounion build [--keep] [--check] [patterns...]
 func runBuild(args []string) error {
-	var keep bool
+	var keep, check bool
 	var patterns []string
 
 	for _, a := range args {
 		switch a {
 		case "--keep", "-k":
 			keep = true
+		case "--check":
+			check = true
 		default:
 			patterns = append(patterns, a)
 		}
@@ -106,6 +108,10 @@ func runBuild(args []string) error {
 		return err
 	}
 
+	if check {
+		return checkUnionFiles(unionFiles)
+	}
+
 	if keep {
 		for _, src := range unionFiles {
 			if err := writeTranspiled(src, stripUnionExt(src)); err != nil {
@@ -116,6 +122,19 @@ func runBuild(args []string) error {
 	}
 
 	return buildWithOverlay(unionFiles, patterns)
+}
+
+func checkUnionFiles(unionFiles []string) error {
+	var errs []string
+	for _, src := range unionFiles {
+		if err := pipeline.TranspileFile(src, io.Discard); err != nil {
+			errs = append(errs, err.Error())
+		}
+	}
+	if len(errs) > 0 {
+		return fmt.Errorf("%s", strings.Join(errs, "\n"))
+	}
+	return nil
 }
 
 func buildWithOverlay(unionFiles []string, patterns []string) error {

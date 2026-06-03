@@ -103,8 +103,8 @@ cat foo.union.go | gounion        # stdin → stdout
 ### Validate without emitting output
 
 ```sh
-gounion --check foo.union.go
-gounion build --check ./...       # not yet supported; use --check per file
+gounion --check foo.union.go      # single file
+gounion build --check ./...       # validate all .union.go files in module
 ```
 
 ---
