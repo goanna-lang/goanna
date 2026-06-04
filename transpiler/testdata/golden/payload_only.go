@@ -1,5 +1,7 @@
 package main
 
+// Types here are just examples
+// Single initials here are rubbish
 type redConfig struct{ r int }
 type blueConfig struct{ b int }
 type greenConfig struct{ g int }
