@@ -3,7 +3,7 @@ package parser
 import (
 	"testing"
 
-	"github.com/nahmanmate/gounion/internal/ast"
+	"github.com/nahmanmate/gounion/ast"
 )
 
 func mustParse(t *testing.T, src string) *ast.File {

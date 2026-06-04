@@ -17,9 +17,10 @@ func (OpaqueChunk) item() {}
 
 // UnionDecl represents: type <Name> union { <variants> }
 type UnionDecl struct {
-	Line     int
-	Name     string
-	Variants []VariantGroup
+	Line      int
+	EndOffset int // byte offset just after closing '}'
+	Name      string
+	Variants  []VariantGroup
 }
 
 func (UnionDecl) item() {}
@@ -33,11 +34,12 @@ type VariantGroup struct {
 
 // UnionSwitch represents a switch statement using .(union).
 type UnionSwitch struct {
-	Line       int
-	BindVar    string      // empty if no binding variable
-	Subject    string      // expression before .(union), e.g. "greg.gender"
-	Cases      []UnionCase
-	HasDefault bool
+	Line        int
+	EndOffset   int    // byte offset just after closing '}'
+	BindVar     string // empty if no binding variable
+	Subject     string // expression before .(union), e.g. "greg.gender"
+	Cases       []UnionCase
+	HasDefault  bool
 	DefaultBody string
 }
 

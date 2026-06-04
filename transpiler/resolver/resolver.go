@@ -3,7 +3,7 @@ package resolver
 import (
 	"fmt"
 
-	"github.com/nahmanmate/gounion/internal/ast"
+	"github.com/nahmanmate/gounion/ast"
 )
 
 type Variant struct {
