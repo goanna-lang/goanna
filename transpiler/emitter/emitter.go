@@ -4,29 +4,56 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nahmanmate/gounion/internal/ast"
-	"github.com/nahmanmate/gounion/internal/resolver"
+	"github.com/nahmanmate/gounion/ast"
+	"github.com/nahmanmate/gounion/resolver"
 )
+
+// ItemLineRange records the 0-indexed line range an item occupies in emitter output.
+// End is exclusive.
+type ItemLineRange struct{ Start, End int }
 
 // Emit converts an ast.File into Go source text.
 // The result is not yet gofmt'd — call go/format on it afterward.
 func Emit(file *ast.File, tbl *resolver.SymbolTable) (string, error) {
+	src, _, err := EmitWithLineMap(file, tbl)
+	return src, err
+}
+
+// EmitWithLineMap is like Emit but also returns per-item line ranges in the output.
+// Ranges are 0-indexed and parallel to file.Items.
+func EmitWithLineMap(file *ast.File, tbl *resolver.SymbolTable) (string, []ItemLineRange, error) {
 	var b strings.Builder
-	for _, item := range file.Items {
+	ranges := make([]ItemLineRange, len(file.Items))
+
+	countLines := func(s string) int {
+		n := strings.Count(s, "\n")
+		return n
+	}
+
+	line := 0
+	for i, item := range file.Items {
+		start := line
 		switch v := item.(type) {
 		case ast.OpaqueChunk:
 			b.WriteString(v.Text)
+			line += countLines(v.Text)
 		case ast.UnionDecl:
+			before := b.Len()
 			if err := emitUnionDecl(&b, v, tbl); err != nil {
-				return "", err
+				return "", nil, err
 			}
+			line += countLines(b.String()[before:])
 		case ast.UnionSwitch:
+			before := b.Len()
 			if err := emitUnionSwitch(&b, v, tbl); err != nil {
-				return "", err
+				return "", nil, err
 			}
+			line += countLines(b.String()[before:])
 		}
+		ranges[i] = ItemLineRange{Start: start, End: line}
 	}
-	return b.String(), nil
+
+	return b.String(), ranges, nil
 }
 
 func emitUnionDecl(b *strings.Builder, decl ast.UnionDecl, tbl *resolver.SymbolTable) error {

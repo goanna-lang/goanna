@@ -10,14 +10,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nahmanmate/gounion/internal/parser"
-	"github.com/nahmanmate/gounion/internal/resolver"
+	"github.com/nahmanmate/gounion/parser"
+	"github.com/nahmanmate/gounion/resolver"
 )
 
 var updateGolden = flag.Bool("update", false, "update golden files")
 
 func testdataPath(rel string) string {
-	return filepath.Join("..", "..", "testdata", rel)
+	return filepath.Join("..", "testdata", rel)
 }
 
 func goldenPath(name string) string {
