@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nahmanmate/gounion/internal/ast"
-	"github.com/nahmanmate/gounion/internal/resolver"
+	"github.com/nahmanmate/gounion/ast"
+	"github.com/nahmanmate/gounion/resolver"
 )
 
 // genderTable is a shared SymbolTable used across checker tests.
@@ -208,9 +208,9 @@ func TestInferUnionName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := inferUnionName(tt.sw, tbl)
+			got := InferUnionName(tt.sw, tbl)
 			if got != tt.wantRes {
-				t.Errorf("inferUnionName: got %q, want %q", got, tt.wantRes)
+				t.Errorf("InferUnionName: got %q, want %q", got, tt.wantRes)
 			}
 		})
 	}
