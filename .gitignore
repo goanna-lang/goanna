@@ -3,3 +3,4 @@ transpiler/full_example
 
 # transpiler binary
 transpiler/cmd/gounion/gounion
+transpiler/cmd/gounion/gounion.exe
