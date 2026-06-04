@@ -1,8 +1,11 @@
 # Contributing
 
+GoUnion is pre-1.0 and experimental. Contributions welcome — breaking changes still happen.
+
 ## Prerequisites
 
 - Go 1.26+
+- [golangci-lint](https://golangci-lint.run/usage/install/) (for linting)
 
 ## Development setup
 
@@ -67,6 +70,12 @@ CI enforces lint clean. Fix all warnings before opening a PR.
 - New syntax features need parser + emitter + checker coverage, plus golden-file tests.
 - Bug fixes need a regression test.
 
+## Commit messages
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `chore:`, `docs:`, `test:`, etc.
+
 ## Reporting issues
 
 Open an issue with a minimal `.union.go` reproducer and the actual vs. expected output.
+
+For security issues, see [SECURITY.md](SECURITY.md).
