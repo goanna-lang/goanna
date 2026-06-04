@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/nahmanmate/gounion/internal/ast"
+	"github.com/nahmanmate/gounion/ast"
 )
 
 // Parse converts .union.go source into an ast.File.
@@ -193,6 +193,7 @@ func (p *chunkParser) parseUnionDecl() (ast.UnionDecl, error) {
 		p.consume() // }
 	}
 
+	decl.EndOffset = p.currentOffset()
 	return decl, nil
 }
 
@@ -294,6 +295,7 @@ func (p *chunkParser) parseUnionSwitch() (ast.UnionSwitch, error) {
 		p.consume()
 	}
 
+	sw.EndOffset = p.currentOffset()
 	return sw, nil
 }
 
