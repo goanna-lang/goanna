@@ -1,0 +1,46 @@
+name: gounion
+description: Validate or generate Go code from .union.go files using gounion
+branding:
+  icon: git-merge
+  color: blue
+
+inputs:
+  mode:
+    description: "'check' to validate without writing files; 'generate' to write transpiled .go files to disk"
+    required: false
+    default: check
+  pattern:
+    description: Go package pattern passed to gounion build (e.g. ./...)
+    required: false
+    default: ./...
+  version:
+    description: gounion version to install (e.g. v0.1.0 or latest)
+    required: false
+    default: latest
+  go-version:
+    description: Go version for setup-go. Empty string uses the version from go.mod
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+      with:
+        go-version: ${{ inputs.go-version }}
+        go-version-file: go.mod
+
+    - name: Install gounion
+      shell: bash
+      run: go install github.com/nahmanmate/gounion/cmd/gounion@${{ inputs.version }}
+
+    - name: Run gounion (check)
+      if: inputs.mode == 'check'
+      shell: bash
+      run: gounion build --check ${{ inputs.pattern }}
+
+    - name: Run gounion (generate)
+      if: inputs.mode == 'generate'
+      shell: bash
+      run: gounion build --keep ${{ inputs.pattern }}
