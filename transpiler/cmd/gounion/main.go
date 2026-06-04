@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"github.com/alecthomas/kong"
-	"github.com/nahmanmate/gounion/internal/pipeline"
+	"github.com/nahmanmate/gounion/pipeline"
 )
 
 // transpile subcommand (default when no subcommand given)
