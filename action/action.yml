@@ -31,16 +31,32 @@ runs:
         go-version: ${{ inputs.go-version }}
         go-version-file: go.mod
 
+    - name: Validate mode
+      shell: bash
+      env:
+        MODE: ${{ inputs.mode }}
+      run: |
+        if [[ "$MODE" != "check" && "$MODE" != "generate" ]]; then
+          echo "Error: invalid mode '$MODE'. Must be 'check' or 'generate'." >&2
+          exit 1
+        fi
+
     - name: Install gounion
       shell: bash
-      run: go install github.com/nahmanmate/gounion/cmd/gounion@${{ inputs.version }}
+      env:
+        GOUNION_VERSION: ${{ inputs.version }}
+      run: go install "github.com/nahmanmate/gounion/cmd/gounion@${GOUNION_VERSION}"
 
     - name: Run gounion (check)
       if: inputs.mode == 'check'
       shell: bash
-      run: gounion build --check ${{ inputs.pattern }}
+      env:
+        GOUNION_PATTERN: ${{ inputs.pattern }}
+      run: gounion build --check "${GOUNION_PATTERN}"
 
     - name: Run gounion (generate)
       if: inputs.mode == 'generate'
       shell: bash
-      run: gounion build --keep ${{ inputs.pattern }}
+      env:
+        GOUNION_PATTERN: ${{ inputs.pattern }}
+      run: gounion build --keep "${GOUNION_PATTERN}"
