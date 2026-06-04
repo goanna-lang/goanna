@@ -107,6 +107,55 @@ gounion --check foo.union.go      # single file
 gounion build --check ./...       # validate all .union.go files in module
 ```
 
+### CI / GitHub Actions
+
+Add the reusable action to any workflow to validate or generate union types in CI.
+
+**Validate only (recommended for most projects):**
+
+```yaml
+- uses: nahmanmate/gounion/action@main
+```
+
+**Generate and commit transpiled files:**
+
+```yaml
+- uses: nahmanmate/gounion/action@main
+  with:
+    mode: generate
+```
+
+**Full example workflow:**
+
+```yaml
+name: gounion
+
+on:
+  pull_request:
+    paths: ['**/*.union.go']
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nahmanmate/gounion/action@main
+        with:
+          mode: check      # validate exhaustiveness — no files written
+          pattern: ./...
+```
+
+**Inputs:**
+
+| Input | Default | Description |
+|---|---|---|
+| `mode` | `check` | `check` — validate only; `generate` — write transpiled `.go` files to disk |
+| `pattern` | `./...` | Package pattern passed to `gounion build` |
+| `version` | `latest` | gounion version to install (e.g. `v0.1.0`) |
+| `go-version` | _(from go.mod)_ | Go version; defaults to the version declared in your `go.mod` |
+
 ---
 
 ## Exhaustiveness
