@@ -20,21 +20,22 @@ type VirtualFile struct {
 	ASTFile     *ast.File
 	SymTable    *resolver.SymbolTable
 	CheckErrors []*checker.CheckError
-	ParseError  error     // non-nil = entire transpile failed
-	GoplsDiags  []Diagnostic // latest translated diagnostics received from gopls
+	ParseError  error // non-nil = entire transpile failed
 }
 
 // Store manages open VirtualFile instances.
 type Store struct {
-	mu       sync.RWMutex
-	bySource map[string]*VirtualFile
-	byGen    map[string]*VirtualFile
+	mu         sync.RWMutex
+	bySource   map[string]*VirtualFile
+	byGen      map[string]*VirtualFile
+	goplsDiags map[string][]Diagnostic // sourceURI → latest translated gopls diagnostics
 }
 
 func NewStore() *Store {
 	return &Store{
-		bySource: make(map[string]*VirtualFile),
-		byGen:    make(map[string]*VirtualFile),
+		bySource:   make(map[string]*VirtualFile),
+		byGen:      make(map[string]*VirtualFile),
+		goplsDiags: make(map[string][]Diagnostic),
 	}
 }
 
@@ -77,6 +78,21 @@ func (s *Store) Delete(sourceURI string) {
 		delete(s.byGen, vf.GenURI)
 		delete(s.bySource, sourceURI)
 	}
+	delete(s.goplsDiags, sourceURI)
+}
+
+// StoreGoplsDiags atomically stores translated gopls diagnostics for sourceURI.
+func (s *Store) StoreGoplsDiags(sourceURI string, diags []Diagnostic) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.goplsDiags[sourceURI] = diags
+}
+
+// GetGoplsDiags returns the latest gopls diagnostics for sourceURI (nil if none).
+func (s *Store) GetGoplsDiags(sourceURI string) []Diagnostic {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.goplsDiags[sourceURI]
 }
 
 // sourceToGenURI converts a .union.go URI to the corresponding virtual .go URI.
@@ -86,15 +102,5 @@ func sourceToGenURI(uri string) string {
 		return strings.TrimSuffix(uri, ".union.go") + ".go"
 	}
 	u.Path = strings.TrimSuffix(u.Path, ".union.go") + ".go"
-	return u.String()
-}
-
-// genToSourceURI converts a .go URI back to the .union.go URI.
-func genToSourceURI(uri string) string {
-	u, err := url.Parse(uri)
-	if err != nil {
-		return strings.TrimSuffix(uri, ".go") + ".union.go"
-	}
-	u.Path = strings.TrimSuffix(u.Path, ".go") + ".union.go"
 	return u.String()
 }

@@ -279,8 +279,7 @@ func (p *Proxy) handlePublishDiagnostics(msg *Message) {
 		translated = append(translated, d)
 	}
 
-	vf.GoplsDiags = translated
-	p.store.Set(vf)
+	p.store.StoreGoplsDiags(vf.SourceURI, translated)
 
 	merged := MergeDiagnostics(translated, CheckErrorsToDiagnostics(vf.CheckErrors, vf.SourceBytes))
 	_ = SendDiagnostics(p.editorOut, vf.SourceURI, merged)
@@ -391,17 +390,18 @@ func (p *Proxy) sendDidOpenToGopls(vf *VirtualFile, version int) {
 }
 
 func (p *Proxy) sendCheckerDiags(vf *VirtualFile) {
-	var diags []Diagnostic
+	var checkerDiags []Diagnostic
 	if vf.ParseError != nil {
-		diags = append(diags, Diagnostic{
+		checkerDiags = append(checkerDiags, Diagnostic{
 			Severity: 1,
 			Source:   "gounion",
 			Message:  fmt.Sprintf("parse error: %v", vf.ParseError),
 		})
 	} else {
-		diags = CheckErrorsToDiagnostics(vf.CheckErrors, vf.SourceBytes)
+		checkerDiags = CheckErrorsToDiagnostics(vf.CheckErrors, vf.SourceBytes)
 	}
-	_ = SendDiagnostics(p.editorOut, vf.SourceURI, diags)
+	merged := MergeDiagnostics(p.store.GetGoplsDiags(vf.SourceURI), checkerDiags)
+	_ = SendDiagnostics(p.editorOut, vf.SourceURI, merged)
 }
 
 // forceFullSync patches the initialize result to use full document sync.
