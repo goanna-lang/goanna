@@ -54,18 +54,32 @@ func Run(ctx context.Context, cfg Config) error {
 		}
 	}()
 
-	// Pump editor → proxy (blocking, on stdin).
-	editorIn := bufio.NewReader(os.Stdin)
-	for {
-		msg, err := ReadMessage(editorIn)
-		if err != nil {
-			// EOF = editor closed connection.
-			break
+	// Pump editor → proxy in background so we can also observe gopls exit.
+	editorDone := make(chan struct{})
+	go func() {
+		defer close(editorDone)
+		editorIn := bufio.NewReader(os.Stdin)
+		for {
+			msg, err := ReadMessage(editorIn)
+			if err != nil {
+				return
+			}
+			proxy.HandleEditorMessage(msg)
 		}
-		proxy.HandleEditorMessage(msg)
+	}()
+
+	select {
+	case <-editorDone:
+		// Normal path: editor closed the connection.
+	case err := <-goplsExitCh:
+		if err != nil {
+			logger.Printf("gopls exited unexpectedly: %v", err)
+		} else {
+			logger.Printf("gopls exited unexpectedly with status 0")
+		}
+	case <-ctx.Done():
 	}
 
-	// Editor closed; send graceful shutdown to gopls.
 	goplsProc.Shutdown()
 	cancel()
 	<-goplsDone
