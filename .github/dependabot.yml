@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "gomod"
-    directory: "/"
+    directory: "/transpiler"
     schedule:
       interval: "weekly"
       day: "saturday"
@@ -16,7 +16,7 @@ updates:
     open-pull-requests-limit: 3
 
   - package-ecosystem: "gomod"
-    directory: "/transpiler"
+    directory: "/lsp"
     schedule:
       interval: "weekly"
       day: "saturday"
