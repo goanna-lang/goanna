@@ -69,6 +69,9 @@ func isCaseLine(line string) bool {
 }
 
 func getLineText(src []byte, line int) string {
+	if line < 0 {
+		return ""
+	}
 	lines := bytes.Split(src, []byte{'\n'})
 	if line >= len(lines) {
 		return ""
