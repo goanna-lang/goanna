@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/nahmanmate/gounion/lsp"
+	"github.com/nahmanmate/goanna/lsp"
 )
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 		}
 	}
 	if err := lsp.Run(context.Background(), cfg); err != nil {
-		fmt.Fprintf(os.Stderr, "gounion-lsp: %v\n", err)
+		fmt.Fprintf(os.Stderr, "goanna-lsp: %v\n", err)
 		os.Exit(1)
 	}
 }

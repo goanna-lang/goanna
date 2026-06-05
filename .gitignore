@@ -2,5 +2,5 @@ transpiler/gender_basic
 transpiler/full_example
 
 # transpiler binary
-transpiler/cmd/gounion/gounion
-transpiler/cmd/gounion/gounion.exe
+transpiler/cmd/goanna/goanna
+transpiler/cmd/goanna/goanna.exe

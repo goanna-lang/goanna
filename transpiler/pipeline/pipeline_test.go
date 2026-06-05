@@ -67,7 +67,7 @@ func TestTranspile(t *testing.T) {
 		{
 			name: "full_example",
 			src: func() string {
-				b, _ := os.ReadFile(filepath.Join("..", "testdata", "full_example.union.go"))
+				b, _ := os.ReadFile(filepath.Join("..", "testdata", "full_example.goa"))
 				return string(b)
 			}(),
 			wantOutputContains: "isDeskConfig()",
@@ -112,7 +112,7 @@ func TestTranspile(t *testing.T) {
 // TestTranspileFileNotFound verifies error on missing input file.
 func TestTranspileFileNotFound(t *testing.T) {
 	var buf bytes.Buffer
-	err := TranspileFile("nonexistent_file_that_does_not_exist.union.go", &buf)
+	err := TranspileFile("nonexistent_file_that_does_not_exist.goa", &buf)
 	if err == nil {
 		t.Fatal("want error, got nil")
 	}
@@ -123,7 +123,7 @@ func TestTranspileFileNotFound(t *testing.T) {
 
 // TestTranspileOutputIsValidGo verifies all testdata inputs produce parseable Go.
 func TestTranspileOutputIsValidGo(t *testing.T) {
-	inputs, err := filepath.Glob(filepath.Join("..", "testdata", "*.union.go"))
+	inputs, err := filepath.Glob(filepath.Join("..", "testdata", "*.goa"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,7 +144,7 @@ func TestTranspileOutputIsValidGo(t *testing.T) {
 
 // TestTranspileErrorFiles verifies all error testdata inputs are rejected.
 func TestTranspileErrorFiles(t *testing.T) {
-	inputs, err := filepath.Glob(filepath.Join("..", "testdata", "errors", "*.union.go"))
+	inputs, err := filepath.Glob(filepath.Join("..", "testdata", "errors", "*.goa"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -211,9 +211,9 @@ func FuzzTranspile(f *testing.F) {
 
 	// Add testdata files as seeds.
 	for _, p := range []string{
-		"../testdata/gender_basic.union.go",
-		"../testdata/full_example.union.go",
-		"../testdata/payload_only.union.go",
+		"../testdata/gender_basic.goa",
+		"../testdata/full_example.goa",
+		"../testdata/payload_only.goa",
 	} {
 		if b, err := os.ReadFile(p); err == nil {
 			seeds = append(seeds, string(b))

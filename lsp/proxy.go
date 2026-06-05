@@ -7,12 +7,12 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/nahmanmate/gounion/pipeline"
+	"github.com/nahmanmate/goanna/pipeline"
 )
 
 // pendingRequest tracks a forwarded request awaiting a gopls response.
 type pendingRequest struct {
-	sourceURI string // empty if not a .union.go file
+	sourceURI string // empty if not a .goa file
 	method    string
 }
 
@@ -396,7 +396,7 @@ func (p *Proxy) sendCheckerDiags(vf *VirtualFile) {
 	if vf.ParseError != nil {
 		checkerDiags = append(checkerDiags, Diagnostic{
 			Severity: 1,
-			Source:   "gounion",
+			Source:   "goanna",
 			Message:  fmt.Sprintf("parse error: %v", vf.ParseError),
 		})
 	} else {

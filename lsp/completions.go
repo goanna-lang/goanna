@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nahmanmate/gounion/ast"
-	"github.com/nahmanmate/gounion/checker"
-	"github.com/nahmanmate/gounion/resolver"
+	"github.com/nahmanmate/goanna/ast"
+	"github.com/nahmanmate/goanna/checker"
+	"github.com/nahmanmate/goanna/resolver"
 )
 
 // CompletionItem is an LSP completion item.

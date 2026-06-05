@@ -7,11 +7,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/nahmanmate/gounion/ast"
-	"github.com/nahmanmate/gounion/checker"
-	"github.com/nahmanmate/gounion/emitter"
-	"github.com/nahmanmate/gounion/parser"
-	"github.com/nahmanmate/gounion/resolver"
+	"github.com/nahmanmate/goanna/ast"
+	"github.com/nahmanmate/goanna/checker"
+	"github.com/nahmanmate/goanna/emitter"
+	"github.com/nahmanmate/goanna/parser"
+	"github.com/nahmanmate/goanna/resolver"
 )
 
 // TranspileFile reads inputPath, transpiles it, and writes valid Go to w.

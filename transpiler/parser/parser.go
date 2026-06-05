@@ -7,10 +7,10 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/nahmanmate/gounion/ast"
+	"github.com/nahmanmate/goanna/ast"
 )
 
-// Parse converts .union.go source into an ast.File.
+// Parse converts .goa source into an ast.File.
 // It uses go/scanner for tokenisation then hand-parses the union-specific constructs.
 func Parse(src []byte) (*ast.File, error) {
 	fset := token.NewFileSet()

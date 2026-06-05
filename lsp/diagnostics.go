@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/nahmanmate/gounion/checker"
+	"github.com/nahmanmate/goanna/checker"
 )
 
 // Position is an LSP zero-indexed line/character position.
@@ -46,7 +46,7 @@ func CheckErrorsToDiagnostics(errs []*checker.CheckError, srcBytes []byte) []Dia
 		diags = append(diags, Diagnostic{
 			Range:    Range{Start: pos, End: end},
 			Severity: 1,
-			Source:   "gounion",
+			Source:   "goanna",
 			Message:  e.Message,
 		})
 	}

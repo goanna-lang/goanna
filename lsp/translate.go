@@ -2,7 +2,7 @@ package lsp
 
 import "encoding/json"
 
-// ForwardPosition maps a .union.go position to a .go position via the source map.
+// ForwardPosition maps a .goa position to a .go position via the source map.
 func ForwardPosition(sm *SourceMap, line, col int) (int, int) {
 	if sm == nil {
 		return line, col
@@ -10,7 +10,7 @@ func ForwardPosition(sm *SourceMap, line, col int) (int, int) {
 	return sm.ToGenerated(line, col)
 }
 
-// BackPosition maps a .go position to a .union.go position via the source map.
+// BackPosition maps a .go position to a .goa position via the source map.
 func BackPosition(sm *SourceMap, line, col int) (int, int) {
 	if sm == nil {
 		return line, col

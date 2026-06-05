@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-GoUnion is pre-1.0 and experimental. Only the latest commit on `main` receives security fixes.
+Goanna is pre-1.0 and experimental. Only the latest commit on `main` receives security fixes.
 
 | Version | Supported |
 |---------|-----------|
@@ -11,21 +11,21 @@ GoUnion is pre-1.0 and experimental. Only the latest commit on `main` receives s
 
 ## Scope
 
-GoUnion is a transpiler — it reads source files and writes Go code. The primary security concerns are:
+Goanna is a transpiler — it reads source files and writes Go code. The primary security concerns are:
 
-- **Malicious input files** — a crafted `.union.go` that causes the transpiler to write unexpected output or access files outside the intended output path.
+- **Malicious input files** — a crafted `.goa` that causes the transpiler to write unexpected output or access files outside the intended output path.
 - **Generated code safety** — the emitter should never produce Go code that introduces vulnerabilities (e.g. unexported types leaking across packages in unintended ways).
 
-Out of scope: issues that require the attacker to already control the machine running `gounion`.
+Out of scope: issues that require the attacker to already control the machine running `goanna`.
 
 ## Reporting a vulnerability
 
-Use [GitHub private security advisories](https://github.com/nahmanmate/gounion/security/advisories/new) to report vulnerabilities confidentially.
+Use [GitHub private security advisories](https://github.com/nahmanmate/goanna/security/advisories/new) to report vulnerabilities confidentially.
 
 Include:
 
-1. A minimal `.union.go` reproducer.
-2. The `gounion` version (`gounion --version` or commit hash).
+1. A minimal `.goa` reproducer.
+2. The `goanna` version (`goanna --version` or commit hash).
 3. What you expected vs. what happened.
 4. Assessed impact.
 

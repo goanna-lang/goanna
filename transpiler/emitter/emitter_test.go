@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nahmanmate/gounion/parser"
-	"github.com/nahmanmate/gounion/resolver"
+	"github.com/nahmanmate/goanna/parser"
+	"github.com/nahmanmate/goanna/resolver"
 )
 
 var updateGolden = flag.Bool("update", false, "update golden files")
@@ -53,9 +53,9 @@ func TestEmitGolden(t *testing.T) {
 		inputFile  string
 		goldenFile string
 	}{
-		{"gender_basic.union.go", "gender_basic.go"},
-		{"full_example.union.go", "full_example.go"},
-		{"payload_only.union.go", "payload_only.go"},
+		{"gender_basic.goa", "gender_basic.go"},
+		{"full_example.goa", "full_example.go"},
+		{"payload_only.goa", "payload_only.go"},
 	}
 
 	for _, tc := range cases {
@@ -91,7 +91,7 @@ func TestEmitGolden(t *testing.T) {
 
 // TestEmitProducesValidGo verifies all testdata inputs produce parseable Go.
 func TestEmitProducesValidGo(t *testing.T) {
-	inputs, err := filepath.Glob(testdataPath("*.union.go"))
+	inputs, err := filepath.Glob(testdataPath("*.goa"))
 	if err != nil {
 		t.Fatal(err)
 	}
