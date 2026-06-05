@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
 // GoplsProcess manages a running gopls subprocess.
@@ -81,9 +82,15 @@ func FindGopls() string {
 	if p, err := exec.LookPath("gopls"); err == nil {
 		return p
 	}
-	if gopath := os.Getenv("GOPATH"); gopath != "" {
-		return gopath + "/bin/gopls"
+	for _, entry := range filepath.SplitList(os.Getenv("GOPATH")) {
+		if entry == "" {
+			continue
+		}
+		candidate := filepath.Join(entry, "bin", "gopls")
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate
+		}
 	}
 	home, _ := os.UserHomeDir()
-	return home + "/go/bin/gopls"
+	return filepath.Join(home, "go", "bin", "gopls")
 }
