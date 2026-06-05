@@ -69,15 +69,7 @@ require('lspconfig').gounion.setup({})
 
 ### VS Code
 
-Add a language server entry in your workspace `.vscode/settings.json`:
-
-```json
-{
-  "languageServerExample.serverPath": "gounion-lsp"
-}
-```
-
-Or use the [generic LSP client extension](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) configured for Go files.
+There is no dedicated gounion VS Code extension. Use the [generic LSP client extension](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) configured for Go files.
 
 ---
 
