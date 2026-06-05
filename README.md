@@ -1,6 +1,6 @@
-# GoUnion
+# Goanna
 
-GoUnion brings sum types (discriminated unions) to Go via a transpiler. Write `.union.go` files using an extended syntax, run `gounion build`, and get valid, idiomatic Go out.
+Goanna brings sum types (discriminated unions) to Go via a transpiler. Write `.goa` files using an extended syntax, run `goanna build`, and get valid, idiomatic Go out.
 
 Designed around [this proposal](https://github.com/golang/go/issues/76920). If sum types land in the language spec, the syntax is intended to be compatible.
 
@@ -69,7 +69,7 @@ default:
 ## Installation
 
 ```sh
-go install github.com/nahmanmate/gounion/cmd/gounion@latest
+go install github.com/nahmanmate/goanna/cmd/goanna@latest
 ```
 
 ---
@@ -79,32 +79,30 @@ go install github.com/nahmanmate/gounion/cmd/gounion@latest
 ### Build a project
 
 ```sh
-gounion build ./...
+goanna build ./...
 ```
 
-Transpiles all `.union.go` files in the module to a temp directory and passes them to `go build` via `-overlay`. Source tree stays clean — no generated files written to disk.
+Transpiles all `.goa` files in the module to a temp directory and passes them to `go build` via `-overlay`. Source tree stays clean — no generated files written to disk.
 
 ```sh
-gounion build --keep ./...   # write generated .go files alongside source
-gounion build ./pkg/...      # specific subtree only
+goanna build --keep ./...   # write generated .go files alongside source
+goanna build ./pkg/...      # specific subtree only
 ```
-
-> **Note on `--keep`:** if both `foo.union.go` and the generated `foo.go` are present, plain `go build ./...` will try to compile both. Add `//go:build ignore` to your `.union.go` files to prevent this.
 
 ### Transpile only (no build)
 
 ```sh
-gounion foo.union.go              # writes foo.go alongside
-gounion foo.union.go -o out.go    # explicit output path
-gounion foo.union.go -o -         # stdout
-cat foo.union.go | gounion        # stdin → stdout
+goanna foo.goa              # writes foo.go alongside
+goanna foo.goa -o out.go    # explicit output path
+goanna foo.goa -o -         # stdout
+cat foo.goa | goanna        # stdin → stdout
 ```
 
 ### Validate without emitting output
 
 ```sh
-gounion --check foo.union.go      # single file
-gounion build --check ./...       # validate all .union.go files in module
+goanna --check foo.goa      # single file
+goanna build --check ./...       # validate all .goa files in module
 ```
 
 ### CI / GitHub Actions
@@ -114,13 +112,13 @@ Add the reusable action to any workflow to validate or generate union types in C
 **Validate only (recommended for most projects):**
 
 ```yaml
-- uses: nahmanmate/gounion/action@main
+- uses: nahmanmate/goanna/action@main
 ```
 
 **Generate and commit transpiled files:**
 
 ```yaml
-- uses: nahmanmate/gounion/action@main
+- uses: nahmanmate/goanna/action@main
   with:
     mode: generate
 ```
@@ -128,11 +126,11 @@ Add the reusable action to any workflow to validate or generate union types in C
 **Full example workflow:**
 
 ```yaml
-name: gounion
+name: goanna
 
 on:
   pull_request:
-    paths: ['**/*.union.go']
+    paths: ['**/*.goa']
 
 jobs:
   check:
@@ -141,7 +139,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: nahmanmate/gounion/action@main
+      - uses: nahmanmate/goanna/action@main
         with:
           mode: check      # validate exhaustiveness — no files written
           pattern: ./...
@@ -152,8 +150,8 @@ jobs:
 | Input | Default | Description |
 |---|---|---|
 | `mode` | `check` | `check` — validate only; `generate` — write transpiled `.go` files to disk |
-| `pattern` | `./...` | Package pattern passed to `gounion build` |
-| `version` | `latest` | gounion version to install (e.g. `v0.1.0`) |
+| `pattern` | `./...` | Package pattern passed to `goanna build` |
+| `version` | `latest` | goanna version to install (e.g. `v0.1.0`) |
 | `go-version` | _(from go.mod)_ | Go version; defaults to the version declared in your `go.mod` |
 
 ---
@@ -182,11 +180,11 @@ default: // ok — not all cases required
 
 ## Editor support (LSP)
 
-`gounion-lsp` is a language server proxy that adds GoUnion intelligence to any editor already running `gopls`. It handles `.union.go` files transparently — diagnostics, completions, go-to-definition, and hover all work against your source, not the generated code.
+`goanna-lsp` is a language server proxy that adds Goanna intelligence to any editor already running `gopls`. It handles `.goa` files transparently — diagnostics, completions, go-to-definition, and hover all work against your source, not the generated code.
 
 ```sh
-go install github.com/nahmanmate/gounion/lsp/cmd/gounion-lsp@latest
-gounion-lsp          # reads stdin, writes stdout — standard LSP stdio transport
+go install github.com/nahmanmate/goanna/lsp/cmd/goanna-lsp@latest
+goanna-lsp          # reads stdin, writes stdout — standard LSP stdio transport
 ```
 
 See [`lsp/README.md`](lsp/README.md) for editor configuration, features, and architecture.
@@ -196,7 +194,7 @@ See [`lsp/README.md`](lsp/README.md) for editor configuration, features, and arc
 ## How it works
 
 ```
-.union.go  →  parser  →  resolver  →  checker  →  emitter  →  go/format  →  .go
+.goa  →  parser  →  resolver  →  checker  →  emitter  →  go/format  →  .go
 ```
 
 1. **Parser** — custom parser handles the `union` keyword and `.(union)` syntax; everything else is passed through verbatim
@@ -205,6 +203,6 @@ See [`lsp/README.md`](lsp/README.md) for editor configuration, features, and arc
 4. **Emitter** — rewrites union declarations and switches to idiomatic Go
 5. **Formatter** — runs `go/format` on the output
 
-The generated code uses only standard Go — sealed interfaces, unexported wrapper structs, and type switches. No runtime dependency on GoUnion.
+The generated code uses only standard Go — sealed interfaces, unexported wrapper structs, and type switches. No runtime dependency on Goanna.
 
-The LSP proxy (`gounion-lsp`) runs the same pipeline in-memory on every edit, skipping `go/format`, and maps positions back to the source file so the editor never sees the generated code.
+The LSP proxy (`goanna-lsp`) runs the same pipeline in-memory on every edit, skipping `go/format`, and maps positions back to the source file so the editor never sees the generated code.

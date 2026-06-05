@@ -1,4 +1,4 @@
-module github.com/nahmanmate/gounion
+module github.com/nahmanmate/goanna
 
 go 1.26.2
 

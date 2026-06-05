@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nahmanmate/gounion/ast"
-	"github.com/nahmanmate/gounion/resolver"
+	"github.com/nahmanmate/goanna/ast"
+	"github.com/nahmanmate/goanna/resolver"
 )
 
 // ItemLineRange records the 0-indexed line range an item occupies in emitter output.

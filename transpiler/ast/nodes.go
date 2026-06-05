@@ -1,6 +1,6 @@
 package ast
 
-// File is the top-level result of parsing a .union.go file.
+// File is the top-level result of parsing a .goa file.
 // Items are in source order: OpaqueChunks interleaved with UnionDecls and UnionSwitches.
 type File struct {
 	Items []Item

@@ -3,11 +3,11 @@ package lsp
 import (
 	"bytes"
 
-	"github.com/nahmanmate/gounion/ast"
-	"github.com/nahmanmate/gounion/emitter"
+	"github.com/nahmanmate/goanna/ast"
+	"github.com/nahmanmate/goanna/emitter"
 )
 
-// SourceMap maps lines between .union.go source and raw emitter output.
+// SourceMap maps lines between .goa source and raw emitter output.
 // All line numbers are 0-indexed. -1 means no direct mapping (inside an expansion).
 type SourceMap struct {
 	SrcToGen []int // srcLine → genLine
@@ -15,7 +15,7 @@ type SourceMap struct {
 }
 
 // Build constructs a SourceMap from the AST and per-item emitter line ranges.
-// srcBytes is the original .union.go source.
+// srcBytes is the original .goa source.
 func Build(srcBytes []byte, astFile *ast.File, itemRanges []emitter.ItemLineRange) *SourceMap {
 	srcLineCount := bytes.Count(srcBytes, []byte{'\n'}) + 1
 

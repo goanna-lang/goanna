@@ -5,12 +5,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/nahmanmate/gounion/ast"
-	"github.com/nahmanmate/gounion/checker"
-	"github.com/nahmanmate/gounion/resolver"
+	"github.com/nahmanmate/goanna/ast"
+	"github.com/nahmanmate/goanna/checker"
+	"github.com/nahmanmate/goanna/resolver"
 )
 
-// VirtualFile holds the transpilation state for one open .union.go file.
+// VirtualFile holds the transpilation state for one open .goa file.
 type VirtualFile struct {
 	SourceURI   string
 	GenURI      string
@@ -39,13 +39,13 @@ func NewStore() *Store {
 	}
 }
 
-// IsUnionFile reports whether uri points to a .union.go file.
+// IsUnionFile reports whether uri points to a .goa file.
 func (s *Store) IsUnionFile(uri string) bool {
 	u, err := url.Parse(uri)
 	if err != nil {
-		return strings.HasSuffix(uri, ".union.go")
+		return strings.HasSuffix(uri, ".goa")
 	}
-	return strings.HasSuffix(u.Path, ".union.go")
+	return strings.HasSuffix(u.Path, ".goa")
 }
 
 func (s *Store) Get(sourceURI string) (*VirtualFile, bool) {
@@ -95,12 +95,12 @@ func (s *Store) GetGoplsDiags(sourceURI string) []Diagnostic {
 	return s.goplsDiags[sourceURI]
 }
 
-// sourceToGenURI converts a .union.go URI to the corresponding virtual .go URI.
+// sourceToGenURI converts a .goa URI to the corresponding virtual .go URI.
 func sourceToGenURI(uri string) string {
 	u, err := url.Parse(uri)
 	if err != nil {
-		return strings.TrimSuffix(uri, ".union.go") + ".go"
+		return strings.TrimSuffix(uri, ".goa") + ".go"
 	}
-	u.Path = strings.TrimSuffix(u.Path, ".union.go") + ".go"
+	u.Path = strings.TrimSuffix(u.Path, ".goa") + ".go"
 	return u.String()
 }

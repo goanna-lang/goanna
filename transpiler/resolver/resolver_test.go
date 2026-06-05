@@ -3,7 +3,7 @@ package resolver
 import (
 	"testing"
 
-	"github.com/nahmanmate/gounion/ast"
+	"github.com/nahmanmate/goanna/ast"
 )
 
 func makeFile(decls ...ast.UnionDecl) *ast.File {

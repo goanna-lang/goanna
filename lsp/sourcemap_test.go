@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nahmanmate/gounion/emitter"
-	"github.com/nahmanmate/gounion/parser"
-	"github.com/nahmanmate/gounion/pipeline"
-	"github.com/nahmanmate/gounion/resolver"
+	"github.com/nahmanmate/goanna/emitter"
+	"github.com/nahmanmate/goanna/parser"
+	"github.com/nahmanmate/goanna/pipeline"
+	"github.com/nahmanmate/goanna/resolver"
 )
 
 func TestBuildSourceMap_GenderBasic(t *testing.T) {
@@ -96,7 +96,7 @@ func main() {
 	}
 }
 `)
-	result, err := pipeline.TranspileForLSP(src, "test.union.go")
+	result, err := pipeline.TranspileForLSP(src, "test.goa")
 	if err != nil {
 		t.Fatalf("unexpected parse/resolve error: %v", err)
 	}

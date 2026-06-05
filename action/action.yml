@@ -1,5 +1,5 @@
-name: gounion
-description: Validate or generate Go code from .union.go files using gounion
+name: goanna
+description: Validate or generate Go code from .goa files using goanna
 branding:
   icon: git-merge
   color: blue
@@ -10,11 +10,11 @@ inputs:
     required: false
     default: check
   pattern:
-    description: Go package pattern passed to gounion build (e.g. ./...)
+    description: Go package pattern passed to goanna build (e.g. ./...)
     required: false
     default: ./...
   version:
-    description: gounion version to install (e.g. v0.1.0 or latest)
+    description: goanna version to install (e.g. v0.1.0 or latest)
     required: false
     default: latest
   go-version:
@@ -41,22 +41,22 @@ runs:
           exit 1
         fi
 
-    - name: Install gounion
+    - name: Install goanna
       shell: bash
       env:
-        GOUNION_VERSION: ${{ inputs.version }}
-      run: go install "github.com/nahmanmate/gounion/cmd/gounion@${GOUNION_VERSION}"
+        GOANNA_VERSION: ${{ inputs.version }}
+      run: go install "github.com/nahmanmate/goanna/cmd/goanna@${GOANNA_VERSION}"
 
-    - name: Run gounion (check)
+    - name: Run goanna (check)
       if: inputs.mode == 'check'
       shell: bash
       env:
-        GOUNION_PATTERN: ${{ inputs.pattern }}
-      run: gounion build --check "${GOUNION_PATTERN}"
+        GOANNA_PATTERN: ${{ inputs.pattern }}
+      run: goanna build --check "${GOANNA_PATTERN}"
 
-    - name: Run gounion (generate)
+    - name: Run goanna (generate)
       if: inputs.mode == 'generate'
       shell: bash
       env:
-        GOUNION_PATTERN: ${{ inputs.pattern }}
-      run: gounion build --keep "${GOUNION_PATTERN}"
+        GOANNA_PATTERN: ${{ inputs.pattern }}
+      run: goanna build --keep "${GOANNA_PATTERN}"

@@ -67,7 +67,7 @@ jobs:
           EXT=""
           [ "$GOOS" = "windows" ] && EXT=".exe"
           cd transpiler
-          go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o "../gounion-${GOOS}-${GOARCH}${EXT}" ./cmd/gounion/...
+          go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o "../goanna-${GOOS}-${GOARCH}${EXT}" ./cmd/goanna/...
 
       - name: Upload release asset
         env:
@@ -78,4 +78,4 @@ jobs:
         run: |
           EXT=""
           [ "$GOOS" = "windows" ] && EXT=".exe"
-          gh release upload "$TAG" "gounion-${GOOS}-${GOARCH}${EXT}"
+          gh release upload "$TAG" "goanna-${GOOS}-${GOARCH}${EXT}"

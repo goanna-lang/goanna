@@ -16,7 +16,7 @@ type Config struct {
 // Run starts the LSP proxy, reading from stdin and writing to stdout.
 // It blocks until stdin is closed (editor disconnected) or ctx is cancelled.
 func Run(ctx context.Context, cfg Config) error {
-	logger := log.New(os.Stderr, "[gounion-lsp] ", log.LstdFlags)
+	logger := log.New(os.Stderr, "[goanna-lsp] ", log.LstdFlags)
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()

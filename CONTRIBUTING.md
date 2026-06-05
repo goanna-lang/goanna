@@ -1,6 +1,6 @@
 # Contributing
 
-GoUnion is pre-1.0 and experimental. Contributions welcome — breaking changes still happen.
+Goanna is pre-1.0 and experimental. Contributions welcome — breaking changes still happen.
 
 ## Prerequisites
 
@@ -10,8 +10,8 @@ GoUnion is pre-1.0 and experimental. Contributions welcome — breaking changes 
 ## Development setup
 
 ```sh
-git clone https://github.com/nahmanmate/gounion
-cd gounion/transpiler
+git clone https://github.com/nahmanmate/goanna
+cd goanna/transpiler
 go mod download
 ```
 
@@ -19,10 +19,10 @@ go mod download
 
 ```
 transpiler/
-  cmd/gounion/        # CLI entry point
+  cmd/goanna/        # CLI entry point
   internal/
     ast/              # union-extended AST types
-    parser/           # parses .union.go files
+    parser/           # parses .goa files
     resolver/         # builds variant → union symbol table
     checker/          # exhaustiveness validation
     emitter/          # rewrites AST to idiomatic Go
@@ -76,6 +76,6 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `f
 
 ## Reporting issues
 
-Open an issue with a minimal `.union.go` reproducer and the actual vs. expected output.
+Open an issue with a minimal `.goa` reproducer and the actual vs. expected output.
 
 For security issues, see [SECURITY.md](SECURITY.md).
