@@ -180,6 +180,19 @@ default: // ok — not all cases required
 
 ---
 
+## Editor support (LSP)
+
+`gounion-lsp` is a language server proxy that adds GoUnion intelligence to any editor already running `gopls`. It handles `.union.go` files transparently — diagnostics, completions, go-to-definition, and hover all work against your source, not the generated code.
+
+```sh
+go install github.com/nahmanmate/gounion/lsp/cmd/gounion-lsp@latest
+gounion-lsp          # reads stdin, writes stdout — standard LSP stdio transport
+```
+
+See [`lsp/README.md`](lsp/README.md) for editor configuration, features, and architecture.
+
+---
+
 ## How it works
 
 ```
@@ -193,3 +206,5 @@ default: // ok — not all cases required
 5. **Formatter** — runs `go/format` on the output
 
 The generated code uses only standard Go — sealed interfaces, unexported wrapper structs, and type switches. No runtime dependency on GoUnion.
+
+The LSP proxy (`gounion-lsp`) runs the same pipeline in-memory on every edit, skipping `go/format`, and maps positions back to the source file so the editor never sees the generated code.
