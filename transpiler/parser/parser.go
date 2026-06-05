@@ -168,10 +168,10 @@ func (p *chunkParser) isUnionSwitch() bool {
 
 func (p *chunkParser) parseUnionDecl() (ast.UnionDecl, error) {
 	line := p.peek().offset
-	p.consume() // type
+	p.consume()          // type
 	nameT := p.consume() // ident
-	p.consume() // union
-	p.consume() // {
+	p.consume()          // union
+	p.consume()          // {
 
 	decl := ast.UnionDecl{Line: line, Name: nameT.lit}
 

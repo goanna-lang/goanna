@@ -68,10 +68,10 @@ func TestEmitGolden(t *testing.T) {
 
 			golden := goldenPath(tc.goldenFile)
 			if *updateGolden {
-				if err := os.MkdirAll(filepath.Dir(golden), 0755); err != nil {
+				if err := os.MkdirAll(filepath.Dir(golden), 0o755); err != nil {
 					t.Fatalf("mkdir: %v", err)
 				}
-				if err := os.WriteFile(golden, []byte(got), 0644); err != nil {
+				if err := os.WriteFile(golden, []byte(got), 0o644); err != nil {
 					t.Fatalf("write golden: %v", err)
 				}
 				t.Logf("updated %s", golden)

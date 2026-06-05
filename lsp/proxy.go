@@ -28,12 +28,14 @@ func (pm *pendingMap) set(id string, req pendingRequest) {
 	pm.m[id] = req
 	pm.mu.Unlock()
 }
+
 func (pm *pendingMap) get(id string) (pendingRequest, bool) {
 	pm.mu.Lock()
 	defer pm.mu.Unlock()
 	r, ok := pm.m[id]
 	return r, ok
 }
+
 func (pm *pendingMap) del(id string) {
 	pm.mu.Lock()
 	delete(pm.m, id)

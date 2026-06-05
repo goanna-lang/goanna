@@ -15,8 +15,8 @@ type VirtualFile struct {
 	SourceURI   string
 	GenURI      string
 	SourceBytes []byte
-	GenBytes    []byte                // nil if parse/resolve error
-	SourceMap   *SourceMap            // nil if transpile failed
+	GenBytes    []byte     // nil if parse/resolve error
+	SourceMap   *SourceMap // nil if transpile failed
 	ASTFile     *ast.File
 	SymTable    *resolver.SymbolTable
 	CheckErrors []*checker.CheckError

@@ -28,14 +28,15 @@ func TestBuild(t *testing.T) {
 		name               string
 		file               *ast.File
 		wantUnionNames     []string
-		wantVariantCount   map[string]int // union name → variant count
+		wantVariantCount   map[string]int  // union name → variant count
 		wantIsAtom         map[string]bool // variant name → IsAtom
 		wantVariantToUnion map[string]string
 		wantErr            bool
 	}{
 		{
 			name: "single_atom_union",
-			file: makeFile(makeDecl("gender",
+			file: makeFile(makeDecl(
+				"gender",
 				group("atom", "Male", "Female"),
 			)),
 			wantUnionNames:   []string{"gender"},
@@ -51,7 +52,8 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			name: "payload_union",
-			file: makeFile(makeDecl("deskConfig",
+			file: makeFile(makeDecl(
+				"deskConfig",
 				group("normalConfig", "config1"),
 				group("fixedConfig", "config2"),
 			)),
