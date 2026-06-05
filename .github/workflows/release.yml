@@ -62,11 +62,12 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: "0"
+          VERSION: ${{ needs.release-please.outputs.tag_name }}
         run: |
           EXT=""
           [ "$GOOS" = "windows" ] && EXT=".exe"
           cd transpiler
-          go build -trimpath -ldflags="-s -w" -o "../gounion-${{ matrix.goos }}-${{ matrix.goarch }}${EXT}" ./cmd/gounion/...
+          go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o "../gounion-${GOOS}-${GOARCH}${EXT}" ./cmd/gounion/...
 
       - name: Upload release asset
         env:

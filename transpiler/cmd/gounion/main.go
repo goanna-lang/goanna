@@ -23,16 +23,28 @@ var cli struct {
 	Check  bool     `help:"Validate only; do not emit output."`
 }
 
+// default set below but actual version is inserted by CI from release tag
+var version = "dev"
+
 func main() {
-	if len(os.Args) > 1 && os.Args[1] == "build" {
-		if err := runBuild(os.Args[2:]); err != nil {
-			var exitErr *exec.ExitError
-			if errors.As(err, &exitErr) {
-				os.Exit(exitErr.ExitCode())
+	if len(os.Args) > 1 {
+		if os.Args[1] == "--version" || os.Args[1] == "-version" {
+			_, err := fmt.Println("gounion", version)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			}
-			fatalf("%v", err)
+			return
 		}
-		return
+		if os.Args[1] == "build" {
+			if err := runBuild(os.Args[2:]); err != nil {
+				var exitErr *exec.ExitError
+				if errors.As(err, &exitErr) {
+					os.Exit(exitErr.ExitCode())
+				}
+				fatalf("%v", err)
+			}
+			return
+		}
 	}
 
 	kong.Parse(&cli)
