@@ -66,12 +66,12 @@ func Build(srcBytes []byte, astFile *ast.File, itemRanges []emitter.ItemLineRang
 				sm.SrcToGen[declSrcStart] = gr.Start
 				sm.GenToSrc[gr.Start] = declSrcStart
 			}
-			srcLine = declSrcEnd + 1
+			srcLine = declSrcEnd
 
 		case ast.UnionSwitch:
 			swSrcStart := byteToLine(srcBytes, v.Line)
 			swSrcEnd := byteToLine(srcBytes, v.EndOffset)
-			n := swSrcEnd - swSrcStart + 1
+			n := swSrcEnd - swSrcStart
 			genN := gr.End - gr.Start
 			count := n
 			if genN < count {
@@ -85,7 +85,7 @@ func Build(srcBytes []byte, astFile *ast.File, itemRanges []emitter.ItemLineRang
 					sm.GenToSrc[gl] = sl
 				}
 			}
-			srcLine = swSrcEnd + 1
+			srcLine = swSrcEnd
 		}
 	}
 	return sm
