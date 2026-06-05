@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/nahmanmate/gounion/compare/v1.0.0...v1.1.0) (2026-06-05)
+
+
+### Features
+
+* **cli:** added version flag ([7ab40c1](https://github.com/nahmanmate/gounion/commit/7ab40c1db571d81f42e76a79a466b954c869b68e))
+
 ## 1.0.0 (2026-06-05)
 
 
