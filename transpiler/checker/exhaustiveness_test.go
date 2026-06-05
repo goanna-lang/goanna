@@ -65,7 +65,8 @@ func TestCheck(t *testing.T) {
 	}{
 		{
 			name: "exhaustive_no_default",
-			file: fileWith(makeSwitch("greg.gender", "", false,
+			file: fileWith(makeSwitch(
+				"greg.gender", "", false,
 				caseOf("Male"),
 				caseOf("Female"),
 			)),
@@ -73,7 +74,8 @@ func TestCheck(t *testing.T) {
 		},
 		{
 			name: "exhaustive_with_default_opts_out",
-			file: fileWith(makeSwitch("greg.gender", "", true,
+			file: fileWith(makeSwitch(
+				"greg.gender", "", true,
 				caseOf("Male"),
 				// Female missing but default present — no error
 			)),
@@ -81,21 +83,23 @@ func TestCheck(t *testing.T) {
 		},
 		{
 			name: "missing_one_variant",
-			file: fileWith(makeSwitch("greg.gender", "", false,
+			file: fileWith(makeSwitch(
+				"greg.gender", "", false,
 				caseOf("Male"),
 			)),
 			wantErrCount:    1,
 			wantErrContains: []string{"non-exhaustive", "Female"},
 		},
 		{
-			name: "missing_all_variants",
-			file: fileWith(makeSwitch("greg.gender", "", false)),
+			name:            "missing_all_variants",
+			file:            fileWith(makeSwitch("greg.gender", "", false)),
 			wantErrCount:    1,
 			wantErrContains: []string{"non-exhaustive", "Male"},
 		},
 		{
 			name: "unknown_variant_in_case",
-			file: fileWith(makeSwitch("greg.gender", "", false,
+			file: fileWith(makeSwitch(
+				"greg.gender", "", false,
 				caseOf("Nonexistent"),
 				caseOf("Female"),
 			)),
@@ -114,7 +118,8 @@ func TestCheck(t *testing.T) {
 		{
 			name: "non_union_subject_skipped",
 			// Subject "notAUnion" is not in tbl.Unions and no case labels help resolve it.
-			file: fileWith(makeSwitch("notAUnion", "", false,
+			file: fileWith(makeSwitch(
+				"notAUnion", "", false,
 				caseOf("X"),
 			)),
 			wantErrCount: 0,
@@ -122,7 +127,8 @@ func TestCheck(t *testing.T) {
 		{
 			name: "infer_union_from_case_label",
 			// Subject "g" is not a union name, but cases contain "Male" → infer gender.
-			file: fileWith(makeSwitch("g", "", false,
+			file: fileWith(makeSwitch(
+				"g", "", false,
 				caseOf("Male"),
 			)),
 			wantErrCount:    1,
@@ -130,7 +136,8 @@ func TestCheck(t *testing.T) {
 		},
 		{
 			name: "payload_union_exhaustive",
-			file: fileWith(makeSwitch("cfg", "", false,
+			file: fileWith(makeSwitch(
+				"cfg", "", false,
 				caseOf("config1"),
 				caseOf("config2"),
 				caseOf("config3"),
@@ -139,7 +146,8 @@ func TestCheck(t *testing.T) {
 		},
 		{
 			name: "payload_union_missing",
-			file: fileWith(makeSwitch("cfg", "", false,
+			file: fileWith(makeSwitch(
+				"cfg", "", false,
 				caseOf("config1"),
 			)),
 			wantErrCount:    1,

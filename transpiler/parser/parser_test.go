@@ -48,12 +48,12 @@ func findChunks(f *ast.File) []ast.OpaqueChunk {
 // TestParseUnionDecl covers union declaration parsing.
 func TestParseUnionDecl(t *testing.T) {
 	tests := []struct {
-		name        string
-		src         string
-		wantName    string
-		wantGroups  int
-		wantNames   []string // first group names
-		wantType    string   // first group type
+		name       string
+		src        string
+		wantName   string
+		wantGroups int
+		wantNames  []string // first group names
+		wantType   string   // first group type
 	}{
 		{
 			name:       "atom_single",
@@ -259,20 +259,20 @@ func TestParseUnionSwitch(t *testing.T) {
 // TestParseCaseBody verifies verbatim body extraction, including nested braces.
 func TestParseCaseBody(t *testing.T) {
 	tests := []struct {
-		name        string
-		src         string
-		isDefault   bool
-		wantBody    string
+		name      string
+		src       string
+		isDefault bool
+		wantBody  string
 	}{
 		{
-			name:      "simple_body",
-			src:       "switch x.(union) { case A:\n_ = 1\ncase B: }",
-			wantBody:  "_ = 1",
+			name:     "simple_body",
+			src:      "switch x.(union) { case A:\n_ = 1\ncase B: }",
+			wantBody: "_ = 1",
 		},
 		{
-			name:      "nested_braces",
-			src:       "switch x.(union) { case A:\nif true { _ = 1 }\ncase B: }",
-			wantBody:  "if true { _ = 1 }",
+			name:     "nested_braces",
+			src:      "switch x.(union) { case A:\nif true { _ = 1 }\ncase B: }",
+			wantBody: "if true { _ = 1 }",
 		},
 		{
 			name:      "default_body",
