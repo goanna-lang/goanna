@@ -70,26 +70,12 @@ func backTranslateResult(result json.RawMessage, genURI, sourceURI string, sm *S
 	// Try as object.
 	var obj map[string]json.RawMessage
 	if err := json.Unmarshal(result, &obj); err == nil {
-		changed := false
-
-		// Translate range field.
-		if rangeRaw, ok := obj["range"]; ok {
-			var r Range
-			if err := json.Unmarshal(rangeRaw, &r); err == nil {
-				r.Start.Line, r.Start.Character = BackPosition(sm, r.Start.Line, r.Start.Character)
-				r.End.Line, r.End.Character = BackPosition(sm, r.End.Line, r.End.Character)
-				obj["range"], _ = json.Marshal(r)
-				changed = true
-			}
-		}
-
-		// Translate uri field if it refers to our virtual file.
+		// Only rewrite uri and range when the location refers to the virtual
+		// generated file; other URIs must pass through unchanged.
 		if uriRaw, ok := obj["uri"]; ok {
 			var uri string
 			if err := json.Unmarshal(uriRaw, &uri); err == nil && uri == genURI {
 				obj["uri"], _ = json.Marshal(sourceURI)
-				changed = true
-				// Also translate range inside this location.
 				if rangeRaw, ok := obj["range"]; ok {
 					var r Range
 					if err := json.Unmarshal(rangeRaw, &r); err == nil {
@@ -98,13 +84,11 @@ func backTranslateResult(result json.RawMessage, genURI, sourceURI string, sm *S
 						obj["range"], _ = json.Marshal(r)
 					}
 				}
+				out, _ := json.Marshal(obj)
+				return out
 			}
 		}
-
-		if changed {
-			out, _ := json.Marshal(obj)
-			return out
-		}
+		return result
 	}
 
 	// Try as array (e.g., definition returns []Location).
