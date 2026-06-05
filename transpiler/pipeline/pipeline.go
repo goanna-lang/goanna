@@ -61,7 +61,7 @@ func Transpile(src []byte, name string, w io.Writer) error {
 
 // TranspileResult holds everything the LSP proxy needs from one transpilation.
 type TranspileResult struct {
-	Generated   []byte                  // raw (not gofmt'd) Go source
+	Generated   []byte // raw (not gofmt'd) Go source
 	ASTFile     *ast.File
 	SymTable    *resolver.SymbolTable
 	ItemRanges  []emitter.ItemLineRange // line ranges in Generated, parallel to ASTFile.Items
@@ -84,9 +84,12 @@ func TranspileForLSP(src []byte, name string) (*TranspileResult, error) {
 
 	checkErrs := checker.Check(file, tbl)
 
-	raw, ranges, err := emitter.EmitWithLineMap(file, tbl)
-	if err != nil {
-		return nil, fmt.Errorf("%s: emit: %w", name, err)
+	raw, ranges, emitErr := emitter.EmitWithLineMap(file, tbl)
+	if emitErr != nil {
+		checkErrs = append(checkErrs, &checker.CheckError{
+			Kind:    "emit_error",
+			Message: fmt.Sprintf("%s: emit: %s", name, emitErr.Error()),
+		})
 	}
 
 	return &TranspileResult{
