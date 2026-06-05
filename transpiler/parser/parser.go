@@ -57,7 +57,6 @@ type chunkParser struct {
 	tokens []tok
 	src    []byte
 	pos    int // current token index
-	items  []ast.Item
 }
 
 func (p *chunkParser) peek() tok {

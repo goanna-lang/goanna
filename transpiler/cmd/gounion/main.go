@@ -47,7 +47,9 @@ func main() {
 			fatalf("%v", err)
 		}
 		if !cli.Check {
-			os.Stdout.Write(buf.Bytes())
+			if _, err := os.Stdout.Write(buf.Bytes()); err != nil {
+				fatalf("write stdout: %v", err)
+			}
 		}
 		return
 	}
@@ -146,7 +148,7 @@ func buildWithOverlay(unionFiles []string, patterns []string) error {
 	if err != nil {
 		return fmt.Errorf("mktemp: %w", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer os.RemoveAll(tmpDir) //nolint:errcheck
 
 	replace := make(map[string]string)
 	for i, src := range unionFiles {
