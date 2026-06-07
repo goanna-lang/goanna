@@ -53,18 +53,27 @@ The server reads JSON-RPC from stdin and writes to stdout — standard LSP stdio
 
 ### Neovim (via nvim-lspconfig)
 
+Add filetype detection for `.goa` files:
+
 ```lua
-local configs = require('lspconfig.configs')
+vim.filetype.add({ extension = { goa = 'goa' } })
+```
 
-configs.goanna = {
-  default_config = {
-    cmd = { 'goanna-lsp' },
-    filetypes = { 'go' },
-    root_dir = require('lspconfig.util').root_pattern('go.work', 'go.mod'),
-  },
-}
+Then enable the server:
 
-require('lspconfig').goanna.setup({})
+```lua
+vim.lsp.enable('goanna_ls')
+```
+
+If `goanna_ls` is not yet in nvim-lspconfig, register it manually:
+
+```lua
+vim.lsp.config('goanna_ls', {
+  cmd = { 'goanna-lsp' },
+  filetypes = { 'goa' },
+  root_markers = { 'go.work', 'go.mod' },
+})
+vim.lsp.enable('goanna_ls')
 ```
 
 ### VS Code
