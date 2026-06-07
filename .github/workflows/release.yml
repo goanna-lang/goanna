@@ -15,7 +15,7 @@ jobs:
       contents: write
       pull-requests: write
     outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
+      release_created: ${{ steps.release.outputs.release_created || steps.release.outputs.releases_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - name: Run release-please
@@ -51,6 +51,10 @@ jobs:
         run: |
           VERSION="${TAG#transpiler/}"
           gh auth setup-git
+          if ! git ls-remote --exit-code --tags origin "transpiler/${VERSION}" > /dev/null 2>&1; then
+            git tag "transpiler/${VERSION}"
+            git push origin "transpiler/${VERSION}"
+          fi
           cd lsp
           GOWORK=off go get "github.com/nahmanmate/goanna/transpiler@${VERSION}"
           GOWORK=off go mod tidy
