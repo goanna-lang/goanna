@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/nahmanmate/goanna/compare/v1.1.0...v1.1.1) (2026-06-07)
+
+
+### Performance Improvements
+
+* **build:** parallelize multi-file transpilation ([83b2ff8](https://github.com/nahmanmate/goanna/commit/83b2ff812e10c1296b003645d413d2ff5d2995e5))
+
 ## [1.1.0](https://github.com/nahmanmate/goanna/compare/v1.0.0...v1.1.0) (2026-06-07)
 
 
