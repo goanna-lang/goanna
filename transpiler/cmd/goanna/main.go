@@ -142,18 +142,31 @@ func runBuild(args []string) error {
 	}
 
 	if keep {
-		goannaDirs := make(map[string]bool)
+		type keepResult struct {
+			dst      string
+			pkgName  string
+			usesAtom bool
+			err      error
+		}
+		ch := make(chan keepResult, len(unionFiles))
 		for _, src := range unionFiles {
-			dst := stripUnionExt(src)
-			usesAtom, pkgName, err := writeTranspiled(src, dst)
-			if err != nil {
-				return err
+			go func(src string) {
+				dst := stripUnionExt(src)
+				usesAtom, pkgName, err := writeTranspiled(src, dst)
+				ch <- keepResult{dst: dst, pkgName: pkgName, usesAtom: usesAtom, err: err}
+			}(src)
+		}
+		goannaDirs := make(map[string]bool)
+		for range unionFiles {
+			r := <-ch
+			if r.err != nil {
+				return r.err
 			}
-			if usesAtom {
-				dir := filepath.Dir(dst)
+			if r.usesAtom {
+				dir := filepath.Dir(r.dst)
 				if !goannaDirs[dir] {
 					goannaDirs[dir] = true
-					if err := writeGoannTypes(dir, pkgName); err != nil {
+					if err := writeGoannTypes(dir, r.pkgName); err != nil {
 						return err
 					}
 				}
@@ -166,10 +179,17 @@ func runBuild(args []string) error {
 }
 
 func checkUnionFiles(unionFiles []string) error {
-	var errs []string
+	type result struct{ err error }
+	ch := make(chan result, len(unionFiles))
 	for _, src := range unionFiles {
-		if err := pipeline.TranspileFile(src, io.Discard); err != nil {
-			errs = append(errs, err.Error())
+		go func(src string) {
+			ch <- result{pipeline.TranspileFile(src, io.Discard)}
+		}(src)
+	}
+	var errs []string
+	for range unionFiles {
+		if r := <-ch; r.err != nil {
+			errs = append(errs, r.err.Error())
 		}
 	}
 	if len(errs) > 0 {
@@ -189,23 +209,42 @@ func buildWithOverlay(unionFiles []string, patterns []string) error {
 	}
 	defer os.RemoveAll(tmpDir) //nolint:errcheck
 
-	replace := make(map[string]string)
-	atomPkgs := make(map[string]string) // absDir → pkgName
+	type overlayResult struct {
+		abs      string
+		dst      string
+		absDir   string
+		pkgName  string
+		usesAtom bool
+		err      error
+	}
+	ch := make(chan overlayResult, len(unionFiles))
 	for i, src := range unionFiles {
-		abs, err := filepath.Abs(src)
-		if err != nil {
-			return err
+		go func(i int, src string) {
+			abs, err := filepath.Abs(src)
+			if err != nil {
+				ch <- overlayResult{err: err}
+				return
+			}
+			dst := filepath.Join(tmpDir, fmt.Sprintf("%d.go", i))
+			usesAtom, pkgName, err := writeTranspiled(src, dst)
+			ch <- overlayResult{
+				abs: abs, dst: dst, absDir: filepath.Dir(abs),
+				pkgName: pkgName, usesAtom: usesAtom, err: err,
+			}
+		}(i, src)
+	}
+
+	replace := make(map[string]string, len(unionFiles))
+	atomPkgs := make(map[string]string) // absDir → pkgName
+	for range unionFiles {
+		r := <-ch
+		if r.err != nil {
+			return r.err
 		}
-		dst := filepath.Join(tmpDir, fmt.Sprintf("%d.go", i))
-		usesAtom, pkgName, err := writeTranspiled(src, dst)
-		if err != nil {
-			return err
-		}
-		replace[abs] = dst
-		if usesAtom {
-			absDir := filepath.Dir(abs)
-			if _, seen := atomPkgs[absDir]; !seen {
-				atomPkgs[absDir] = pkgName
+		replace[r.abs] = r.dst
+		if r.usesAtom {
+			if _, seen := atomPkgs[r.absDir]; !seen {
+				atomPkgs[r.absDir] = r.pkgName
 			}
 		}
 	}
