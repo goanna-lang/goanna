@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/nahmanmate/goanna/ast"
+	"github.com/nahmanmate/goanna/transpiler/ast"
 )
 
 // Parse converts .goa source into an ast.File.

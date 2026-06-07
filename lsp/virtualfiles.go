@@ -5,9 +5,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/nahmanmate/goanna/ast"
-	"github.com/nahmanmate/goanna/checker"
-	"github.com/nahmanmate/goanna/resolver"
+	"github.com/nahmanmate/goanna/transpiler/ast"
+	"github.com/nahmanmate/goanna/transpiler/checker"
+	"github.com/nahmanmate/goanna/transpiler/resolver"
 )
 
 // VirtualFile holds the transpilation state for one open .goa file.

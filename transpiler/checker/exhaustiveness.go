@@ -3,8 +3,8 @@ package checker
 import (
 	"fmt"
 
-	"github.com/nahmanmate/goanna/ast"
-	"github.com/nahmanmate/goanna/resolver"
+	"github.com/nahmanmate/goanna/transpiler/ast"
+	"github.com/nahmanmate/goanna/transpiler/resolver"
 )
 
 // CheckError is a structured diagnostic from the union checker.

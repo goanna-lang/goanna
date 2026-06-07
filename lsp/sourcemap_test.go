@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nahmanmate/goanna/emitter"
-	"github.com/nahmanmate/goanna/parser"
-	"github.com/nahmanmate/goanna/pipeline"
-	"github.com/nahmanmate/goanna/resolver"
+	"github.com/nahmanmate/goanna/transpiler/emitter"
+	"github.com/nahmanmate/goanna/transpiler/parser"
+	"github.com/nahmanmate/goanna/transpiler/pipeline"
+	"github.com/nahmanmate/goanna/transpiler/resolver"
 )
 
 func TestBuildSourceMap_GenderBasic(t *testing.T) {
