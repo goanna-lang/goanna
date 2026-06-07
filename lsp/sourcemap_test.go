@@ -80,6 +80,89 @@ func main() {
 	t.Logf("GenToSrc[0..5] = %v", sm.GenToSrc[:min(6, len(sm.GenToSrc))])
 }
 
+func TestBuildSourceMap_PayloadVariantLines(t *testing.T) {
+	src := []byte(`package main
+
+type normalConfig struct{ r int }
+type fixedConfig struct{ b int }
+type strangeConfig struct{ g int }
+
+type deskConfig union {
+	config1 normalConfig
+	config2 fixedConfig
+	config3 strangeConfig
+}
+`)
+	// Source lines (0-indexed):
+	// 0: package main
+	// 1: (blank)
+	// 2: type normalConfig struct{ r int }
+	// 3: type fixedConfig struct{ b int }
+	// 4: type strangeConfig struct{ g int }
+	// 5: (blank)
+	// 6: type deskConfig union {
+	// 7:     config1 normalConfig
+	// 8:     config2 fixedConfig
+	// 9:     config3 strangeConfig
+	// 10: }
+
+	astFile, err := parser.Parse(src)
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	tbl, err := resolver.Build(astFile)
+	if err != nil {
+		t.Fatalf("resolve: %v", err)
+	}
+	_, ranges, err := emitter.EmitWithLineMap(astFile, tbl)
+	if err != nil {
+		t.Fatalf("emit: %v", err)
+	}
+	sm := Build(src, astFile, ranges)
+
+	// The union expands to (no atoms, so no wrapper structs):
+	//   func (normalConfig) isDeskConfig() {}   ← genBase+0
+	//   func (fixedConfig) isDeskConfig() {}    ← genBase+1
+	//   func (strangeConfig) isDeskConfig() {}  ← genBase+2
+	//   type deskConfig interface{...}          ← genBase+3
+	genBase, _ := sm.ToGenerated(6, 0) // first line of union → genBase
+
+	for i, want := range []struct {
+		srcLine  int
+		wantGen  int
+		typeName string
+	}{
+		{7, genBase + 0, "normalConfig"},
+		{8, genBase + 1, "fixedConfig"},
+		{9, genBase + 2, "strangeConfig"},
+	} {
+		gotLine, _ := sm.ToGenerated(want.srcLine, 0)
+		if gotLine != want.wantGen {
+			t.Errorf("variant %d (%s): ToGenerated line = %d, want %d", i, want.typeName, gotLine, want.wantGen)
+		}
+
+		// Back-translate: every generated line in the block should map back to decl start.
+		srcBack, _ := sm.ToSource(want.wantGen, 0)
+		if srcBack != 6 {
+			t.Errorf("variant %d (%s): ToSource(%d) = %d, want 6 (decl start)", i, want.typeName, want.wantGen, srcBack)
+		}
+	}
+
+	// Column mapping: cursor on type name in source should land on type name in generated.
+	// Source line 8 = "\tconfig2 fixedConfig"; "fixedConfig" starts at col 9 (tab=1 char + "config2 " = 9).
+	srcTypeCol := typeNameCol(src, 8)
+	// Cursor at srcTypeCol should map to genTypeCol (6 = len("func (")).
+	_, gotCol := sm.ToGenerated(8, srcTypeCol)
+	if gotCol != genTypeCol {
+		t.Errorf("col mapping: cursor at srcTypeCol %d → genCol %d, want %d", srcTypeCol, gotCol, genTypeCol)
+	}
+	// Cursor one char into type name should shift by one.
+	_, gotCol2 := sm.ToGenerated(8, srcTypeCol+3)
+	if gotCol2 != genTypeCol+3 {
+		t.Errorf("col mapping: cursor at srcTypeCol+3 → genCol %d, want %d", gotCol2, genTypeCol+3)
+	}
+}
+
 func TestTranspileForLSP_CheckErrors(t *testing.T) {
 	src := []byte(`package main
 
