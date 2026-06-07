@@ -47,18 +47,21 @@ jobs:
       - name: Pin transpiler version and tag LSP
         env:
           TAG: ${{ needs.release-please.outputs.tag_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          VERSION="${TAG#transpiler/}"
+          gh auth setup-git
           cd lsp
-          GOWORK=off go get "github.com/nahmanmate/goanna@${TAG}"
+          GOWORK=off go get "github.com/nahmanmate/goanna/transpiler@${VERSION}"
           GOWORK=off go mod tidy
           cd ..
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add lsp/go.mod lsp/go.sum
-          git commit -m "chore: pin lsp dependency to ${TAG}"
+          git commit -m "chore: pin lsp dependency to ${VERSION}"
           git push
-          git tag "lsp/${TAG}"
-          git push origin "lsp/${TAG}"
+          git tag "lsp/${VERSION}"
+          git push origin "lsp/${VERSION}"
 
   build:
     name: Build (${{ matrix.goos }}/${{ matrix.goarch }})
@@ -97,8 +100,9 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: "0"
-          VERSION: ${{ needs.release-please.outputs.tag_name }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
         run: |
+          VERSION="${TAG#transpiler/}"
           EXT=""
           [ "$GOOS" = "windows" ] && EXT=".exe"
           cd transpiler
