@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/nahmanmate/goanna/compare/v1.0.0...v1.1.0) (2026-06-07)
+
+
+### Features
+
+* **transpiler:** auto-generate goanna_types.go per package ([a34a259](https://github.com/nahmanmate/goanna/commit/a34a25958ad0fcb90e933d86231d22de95c28dc7)), closes [#17](https://github.com/nahmanmate/goanna/issues/17)
+
 ## 1.0.0 (2026-06-07)
 
 
