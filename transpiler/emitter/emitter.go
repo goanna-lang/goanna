@@ -34,6 +34,8 @@ func EmitWithLineMap(file *ast.File, tbl *resolver.SymbolTable) (string, []ItemL
 	for i, item := range file.Items {
 		start := line
 		switch v := item.(type) {
+		case ast.AtomDecl:
+			// not emitted; goanna_types.go carries this per package
 		case ast.OpaqueChunk:
 			b.WriteString(v.Text)
 			line += countLines(v.Text)

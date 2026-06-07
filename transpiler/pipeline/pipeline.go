@@ -3,6 +3,8 @@ package pipeline
 import (
 	"fmt"
 	"go/format"
+	goparser "go/parser"
+	"go/token"
 	"io"
 	"os"
 	"strings"
@@ -21,6 +23,66 @@ func TranspileFile(inputPath string, w io.Writer) error {
 		return fmt.Errorf("read %s: %w", inputPath, err)
 	}
 	return Transpile(src, inputPath, w)
+}
+
+// TranspileFileEx is like TranspileFile but also returns whether any atom variants are used
+// and the package name (empty string if the source has no package clause).
+func TranspileFileEx(inputPath string, w io.Writer) (usesAtom bool, pkgName string, err error) {
+	src, err := os.ReadFile(inputPath)
+	if err != nil {
+		return false, "", fmt.Errorf("read %s: %w", inputPath, err)
+	}
+	return TranspileEx(src, inputPath, w)
+}
+
+// TranspileEx is like Transpile but also returns whether any atom variants are used
+// and the package name (empty string if the source has no package clause).
+func TranspileEx(src []byte, name string, w io.Writer) (usesAtom bool, pkgName string, err error) {
+	file, err := parser.Parse(src)
+	if err != nil {
+		return false, "", fmt.Errorf("%s: parse: %w", name, err)
+	}
+
+	tbl, err := resolver.Build(file)
+	if err != nil {
+		return false, "", fmt.Errorf("%s: resolve: %w", name, err)
+	}
+
+	checkErrs := checker.Check(file, tbl)
+	if len(checkErrs) > 0 {
+		var msgs []string
+		for _, e := range checkErrs {
+			msgs = append(msgs, e.Error())
+		}
+		return false, "", fmt.Errorf("%s: %s", name, strings.Join(msgs, "\n"))
+	}
+
+	raw, err := emitter.Emit(file, tbl)
+	if err != nil {
+		return false, "", fmt.Errorf("%s: emit: %w", name, err)
+	}
+
+	formatted, err := format.Source([]byte(raw))
+	if err != nil {
+		return false, "", fmt.Errorf("%s: format: %w\n--- unformatted ---\n%s", name, err, raw)
+	}
+
+	if _, err = w.Write(formatted); err != nil {
+		return false, "", err
+	}
+
+	pkgName = extractPackageName(src)
+	return tbl.UsesAtom, pkgName, nil
+}
+
+// extractPackageName returns the package name from Go/goanna source, or "" if absent.
+func extractPackageName(src []byte) string {
+	fset := token.NewFileSet()
+	f, err := goparser.ParseFile(fset, "", src, goparser.PackageClauseOnly)
+	if err != nil || f == nil || f.Name == nil {
+		return ""
+	}
+	return f.Name.Name
 }
 
 // Transpile transpiles src (labelled with name for error messages) and writes to w.

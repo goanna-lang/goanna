@@ -87,6 +87,17 @@ func (p *chunkParser) parseFile() (*ast.File, error) {
 	for p.peek().kind != token.EOF {
 		t := p.peek()
 
+		// Detect: type atom struct{}
+		if t.kind == token.TYPE && p.isAtomDecl() {
+			if chunkEnd := t.offset; chunkEnd > chunkStart {
+				items = append(items, ast.OpaqueChunk{Text: string(p.src[chunkStart:chunkEnd])})
+			}
+			p.consumeAtomDecl()
+			items = append(items, ast.AtomDecl{})
+			chunkStart = p.currentOffset()
+			continue
+		}
+
 		// Detect: type <Ident> union {
 		if t.kind == token.TYPE && p.isUnionDecl() {
 			// flush preceding chunk
@@ -133,6 +144,24 @@ func (p *chunkParser) currentOffset() int {
 		return len(p.src)
 	}
 	return p.tokens[p.pos].offset
+}
+
+// isAtomDecl checks if the current position starts "type atom struct{}"
+func (p *chunkParser) isAtomDecl() bool {
+	return p.peek().kind == token.TYPE &&
+		p.peekN(1).kind == token.IDENT && p.peekN(1).lit == "atom" &&
+		p.peekN(2).kind == token.STRUCT &&
+		p.peekN(3).kind == token.LBRACE &&
+		p.peekN(4).kind == token.RBRACE
+}
+
+// consumeAtomDecl consumes the five tokens of "type atom struct{}"
+func (p *chunkParser) consumeAtomDecl() {
+	p.consume() // type
+	p.consume() // atom
+	p.consume() // struct
+	p.consume() // {
+	p.consume() // }
 }
 
 // isUnionDecl checks if the current position starts "type <Ident> union {"
