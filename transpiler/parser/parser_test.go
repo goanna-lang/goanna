@@ -3,7 +3,7 @@ package parser
 import (
 	"testing"
 
-	"github.com/nahmanmate/goanna/transpiler/ast"
+	"github.com/nahmanmate/goanna/ast"
 )
 
 func mustParse(t *testing.T, src string) *ast.File {

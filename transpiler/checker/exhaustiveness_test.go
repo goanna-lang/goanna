@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nahmanmate/goanna/transpiler/ast"
-	"github.com/nahmanmate/goanna/transpiler/resolver"
+	"github.com/nahmanmate/goanna/ast"
+	"github.com/nahmanmate/goanna/resolver"
 )
 
 // genderTable is a shared SymbolTable used across checker tests.

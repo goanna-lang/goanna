@@ -25,48 +25,6 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-  tag-lsp:
-    name: Tag LSP submodule
-    needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Set up Go
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
-        with:
-          go-version-file: transpiler/go.mod
-          cache-dependency-path: transpiler/go.sum
-
-      - name: Pin transpiler version and tag LSP
-        env:
-          TAG: ${{ needs.release-please.outputs.tag_name }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION="${TAG#transpiler/}"
-          gh auth setup-git
-          cd lsp
-          GOWORK=off go get "github.com/nahmanmate/goanna/transpiler@${VERSION}"
-          GOWORK=off go mod tidy
-          cd ..
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add lsp/go.mod lsp/go.sum
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: pin lsp dependency to ${VERSION}"
-            git push
-          fi
-          if ! git ls-remote --exit-code --tags origin "lsp/${VERSION}" > /dev/null 2>&1; then
-            git tag "lsp/${VERSION}"
-            git push origin "lsp/${VERSION}"
-          fi
-
   build:
     name: Build (${{ matrix.goos }}/${{ matrix.goarch }})
     needs: release-please
@@ -104,9 +62,8 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: "0"
-          TAG: ${{ needs.release-please.outputs.tag_name }}
+          VERSION: ${{ needs.release-please.outputs.tag_name }}
         run: |
-          VERSION="${TAG#transpiler/}"
           EXT=""
           [ "$GOOS" = "windows" ] && EXT=".exe"
           cd transpiler
