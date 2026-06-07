@@ -1,0 +1,764 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+)
+
+type atom struct{}
+
+// ── Union types ───────────────────────────────────────────────────────────────
+
+type httpMethod union {
+	GET, POST, PUT, DELETE, PATCH atom
+}
+
+type userRole union {
+	Admin, Editor, Viewer, Guest atom
+}
+
+type userStatus union {
+	ActiveUser, SuspendedUser, DeletedUser atom
+}
+
+type postStatus union {
+	Draft, Published, Archived atom
+}
+
+type commentStatus union {
+	Visible, Hidden, Flagged atom
+}
+
+type tagColor union {
+	Red, Green, Blue, Yellow, Purple, Orange atom
+}
+
+type sortDir union {
+	Asc, Desc atom
+}
+
+type userSortField union {
+	ByName, ByEmail, ByCreatedAt atom
+}
+
+type postSortField union {
+	ByTitle, ByAuthor, ByPublishedAt atom
+}
+
+type httpStatus union {
+	StatusOK, StatusCreated, StatusNoContent, StatusBadRequest, StatusUnauthorized, StatusForbidden, StatusNotFound, StatusConflict, StatusUnprocessable, StatusInternalError atom
+}
+
+type apiErrorKind union {
+	ValidationErr, NotFoundErr, ConflictErr, UnauthorizedErr, InternalErr atom
+}
+
+type contentType union {
+	JSONContent, PlainTextContent, HTMLContent atom
+}
+
+type authScheme union {
+	BearerAuth, BasicAuth, APIKeyAuth atom
+}
+
+// ── Domain structs ────────────────────────────────────────────────────────────
+
+type user struct {
+	id        int
+	name      string
+	email     string
+	role      userRole
+	status    userStatus
+	createdAt int64
+}
+
+type post struct {
+	id          int
+	title       string
+	body        string
+	authorID    int
+	status      postStatus
+	publishedAt int64
+	createdAt   int64
+}
+
+type comment struct {
+	id        int
+	postID    int
+	authorID  int
+	body      string
+	status    commentStatus
+	createdAt int64
+}
+
+type tag struct {
+	id    int
+	name  string
+	color tagColor
+}
+
+type postTag struct {
+	postID int
+	tagID  int
+}
+
+// ── Request types ─────────────────────────────────────────────────────────────
+
+type createUserReq struct {
+	name  string
+	email string
+	role  userRole
+}
+
+type updateUserReq struct {
+	name   string
+	email  string
+	role   userRole
+	status userStatus
+}
+
+type listUsersReq struct {
+	page      int
+	perPage   int
+	sortField userSortField
+	sortDir   sortDir
+}
+
+type createPostReq struct {
+	title    string
+	body     string
+	authorID int
+	status   postStatus
+}
+
+type updatePostReq struct {
+	title  string
+	body   string
+	status postStatus
+}
+
+type listPostsReq struct {
+	page      int
+	perPage   int
+	sortField postSortField
+	sortDir   sortDir
+	authorID  int
+}
+
+type createCommentReq struct {
+	postID   int
+	authorID int
+	body     string
+}
+
+type createTagReq struct {
+	name  string
+	color tagColor
+}
+
+// ── Response types ────────────────────────────────────────────────────────────
+
+type apiErr struct {
+	kind    apiErrorKind
+	message string
+	field   string
+}
+
+type apiResp struct {
+	status  httpStatus
+	body    []byte
+	content contentType
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+func httpStatusCode(s httpStatus) int {
+	switch s.(union) {
+	case StatusOK:
+		return 200
+	case StatusCreated:
+		return 201
+	case StatusNoContent:
+		return 204
+	case StatusBadRequest:
+		return 400
+	case StatusUnauthorized:
+		return 401
+	case StatusForbidden:
+		return 403
+	case StatusNotFound:
+		return 404
+	case StatusConflict:
+		return 409
+	case StatusUnprocessable:
+		return 422
+	case StatusInternalError:
+		return 500
+	default:
+		return 500
+	}
+}
+
+func roleString(r userRole) string {
+	switch r.(union) {
+	case Admin:
+		return "admin"
+	case Editor:
+		return "editor"
+	case Viewer:
+		return "viewer"
+	case Guest:
+		return "guest"
+	default:
+		return "guest"
+	}
+}
+
+func userStatusString(s userStatus) string {
+	switch s.(union) {
+	case ActiveUser:
+		return "active"
+	case SuspendedUser:
+		return "suspended"
+	case DeletedUser:
+		return "deleted"
+	default:
+		return "active"
+	}
+}
+
+func postStatusString(s postStatus) string {
+	switch s.(union) {
+	case Draft:
+		return "draft"
+	case Published:
+		return "published"
+	case Archived:
+		return "archived"
+	default:
+		return "draft"
+	}
+}
+
+func commentStatusString(s commentStatus) string {
+	switch s.(union) {
+	case Visible:
+		return "visible"
+	case Hidden:
+		return "hidden"
+	case Flagged:
+		return "flagged"
+	default:
+		return "visible"
+	}
+}
+
+func tagColorString(c tagColor) string {
+	switch c.(union) {
+	case Red:
+		return "red"
+	case Green:
+		return "green"
+	case Blue:
+		return "blue"
+	case Yellow:
+		return "yellow"
+	case Purple:
+		return "purple"
+	case Orange:
+		return "orange"
+	default:
+		return "blue"
+	}
+}
+
+func sortDirSQL(d sortDir) string {
+	switch d.(union) {
+	case Asc:
+		return "ASC"
+	case Desc:
+		return "DESC"
+	default:
+		return "ASC"
+	}
+}
+
+func userSortSQL(f userSortField) string {
+	switch f.(union) {
+	case ByName:
+		return "name"
+	case ByEmail:
+		return "email"
+	case ByCreatedAt:
+		return "created_at"
+	default:
+		return "id"
+	}
+}
+
+func postSortSQL(f postSortField) string {
+	switch f.(union) {
+	case ByTitle:
+		return "title"
+	case ByAuthor:
+		return "author_id"
+	case ByPublishedAt:
+		return "published_at"
+	default:
+		return "id"
+	}
+}
+
+func errKindMessage(k apiErrorKind) string {
+	switch k.(union) {
+	case ValidationErr:
+		return "validation error"
+	case NotFoundErr:
+		return "not found"
+	case ConflictErr:
+		return "conflict"
+	case UnauthorizedErr:
+		return "unauthorized"
+	case InternalErr:
+		return "internal server error"
+	default:
+		return "unknown error"
+	}
+}
+
+func contentTypeHeader(c contentType) string {
+	switch c.(union) {
+	case JSONContent:
+		return "application/json"
+	case PlainTextContent:
+		return "text/plain"
+	case HTMLContent:
+		return "text/html"
+	default:
+		return "application/json"
+	}
+}
+
+func authSchemePrefix(a authScheme) string {
+	switch a.(union) {
+	case BearerAuth:
+		return "Bearer "
+	case BasicAuth:
+		return "Basic "
+	case APIKeyAuth:
+		return "ApiKey "
+	default:
+		return ""
+	}
+}
+
+func parseMethod(r *http.Request) httpMethod {
+	switch r.Method {
+	case "GET":
+		return GET
+	case "POST":
+		return POST
+	case "PUT":
+		return PUT
+	case "DELETE":
+		return DELETE
+	case "PATCH":
+		return PATCH
+	default:
+		return GET
+	}
+}
+
+func writeResp(w http.ResponseWriter, resp apiResp) {
+	ct := contentTypeHeader(resp.content)
+	w.Header().Set("Content-Type", ct)
+	code := httpStatusCode(resp.status)
+	w.WriteHeader(code)
+	if resp.body != nil {
+		w.Write(resp.body)
+	}
+}
+
+func jsonResp(status httpStatus, v interface{}) apiResp {
+	body, _ := json.Marshal(v)
+	return apiResp{status: status, body: body, content: JSONContent}
+}
+
+func idFromPath(path string) (int, error) {
+	parts := strings.Split(strings.Trim(path, "/"), "/")
+	if len(parts) < 2 {
+		return 0, fmt.Errorf("no id in path")
+	}
+	return strconv.Atoi(parts[len(parts)-1])
+}
+
+func buildOrderClause(field string, dir sortDir) string {
+	return field + " " + sortDirSQL(dir)
+}
+
+func buildUserQuery(req listUsersReq) string {
+	field := userSortSQL(req.sortField)
+	return "SELECT * FROM users ORDER BY " + buildOrderClause(field, req.sortDir) +
+		" LIMIT " + strconv.Itoa(req.perPage) +
+		" OFFSET " + strconv.Itoa((req.page-1)*req.perPage)
+}
+
+func buildPostQuery(req listPostsReq) string {
+	field := postSortSQL(req.sortField)
+	return "SELECT * FROM posts ORDER BY " + buildOrderClause(field, req.sortDir) +
+		" LIMIT " + strconv.Itoa(req.perPage) +
+		" OFFSET " + strconv.Itoa((req.page-1)*req.perPage)
+}
+
+// ── User handlers ─────────────────────────────────────────────────────────────
+
+func usersHandler(w http.ResponseWriter, r *http.Request) {
+	m := parseMethod(r)
+	switch m.(union) {
+	case GET:
+		listUsersHandler(w, r)
+	case POST:
+		createUserHandler(w, r)
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func userHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := idFromPath(r.URL.Path)
+	if err != nil {
+		http.Error(w, "bad id", http.StatusBadRequest)
+		return
+	}
+	m := parseMethod(r)
+	switch m.(union) {
+	case GET:
+		getUserHandler(w, r, id)
+	case PUT:
+		updateUserHandler(w, r, id)
+	case DELETE:
+		deleteUserHandler(w, r, id)
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func listUsersHandler(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	page, _ := strconv.Atoi(q.Get("page"))
+	if page < 1 {
+		page = 1
+	}
+	perPage, _ := strconv.Atoi(q.Get("per_page"))
+	if perPage < 1 || perPage > 100 {
+		perPage = 20
+	}
+	req := listUsersReq{page: page, perPage: perPage, sortField: ByName, sortDir: Asc}
+	_ = buildUserQuery(req)
+	writeResp(w, jsonResp(StatusOK, map[string]interface{}{"users": []user{}, "total": 0}))
+}
+
+func createUserHandler(w http.ResponseWriter, r *http.Request) {
+	var req createUserReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeResp(w, jsonResp(StatusBadRequest, apiErr{kind: ValidationErr, message: "invalid json"}))
+		return
+	}
+	if req.name == "" || req.email == "" {
+		writeResp(w, jsonResp(StatusUnprocessable, apiErr{kind: ValidationErr, message: "name and email required"}))
+		return
+	}
+	u := user{id: 1, name: req.name, email: req.email, role: req.role, status: ActiveUser}
+	writeResp(w, jsonResp(StatusCreated, map[string]interface{}{"id": u.id, "role": roleString(u.role)}))
+}
+
+func getUserHandler(w http.ResponseWriter, r *http.Request, id int) {
+	_ = r
+	if id <= 0 {
+		writeResp(w, jsonResp(StatusNotFound, apiErr{kind: NotFoundErr, message: "user not found"}))
+		return
+	}
+	u := user{id: id, name: "Alice", email: "alice@example.com", role: Admin, status: ActiveUser}
+	writeResp(w, jsonResp(StatusOK, map[string]interface{}{
+		"id":     u.id,
+		"name":   u.name,
+		"email":  u.email,
+		"role":   roleString(u.role),
+		"status": userStatusString(u.status),
+	}))
+}
+
+func updateUserHandler(w http.ResponseWriter, r *http.Request, id int) {
+	_ = id
+	var req updateUserReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeResp(w, jsonResp(StatusBadRequest, apiErr{kind: ValidationErr, message: "invalid json"}))
+		return
+	}
+	writeResp(w, jsonResp(StatusOK, map[string]bool{"updated": true}))
+}
+
+func deleteUserHandler(w http.ResponseWriter, r *http.Request, id int) {
+	_ = r
+	_ = id
+	writeResp(w, apiResp{status: StatusNoContent, content: JSONContent})
+}
+
+// ── Post handlers ─────────────────────────────────────────────────────────────
+
+func postsHandler(w http.ResponseWriter, r *http.Request) {
+	m := parseMethod(r)
+	switch m.(union) {
+	case GET:
+		listPostsHandler(w, r)
+	case POST:
+		createPostHandler(w, r)
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func postHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := idFromPath(r.URL.Path)
+	if err != nil {
+		http.Error(w, "bad id", http.StatusBadRequest)
+		return
+	}
+	m := parseMethod(r)
+	switch m.(union) {
+	case GET:
+		getPostHandler(w, r, id)
+	case PUT:
+		updatePostHandler(w, r, id)
+	case DELETE:
+		deletePostHandler(w, r, id)
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func listPostsHandler(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	page, _ := strconv.Atoi(q.Get("page"))
+	if page < 1 {
+		page = 1
+	}
+	req := listPostsReq{page: page, perPage: 20, sortField: ByTitle, sortDir: Desc}
+	_ = buildPostQuery(req)
+	writeResp(w, jsonResp(StatusOK, map[string]interface{}{"posts": []post{}, "total": 0}))
+}
+
+func createPostHandler(w http.ResponseWriter, r *http.Request) {
+	var req createPostReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeResp(w, jsonResp(StatusBadRequest, apiErr{kind: ValidationErr, message: "invalid json"}))
+		return
+	}
+	if req.title == "" {
+		writeResp(w, jsonResp(StatusUnprocessable, apiErr{kind: ValidationErr, message: "title required"}))
+		return
+	}
+	p := post{id: 1, title: req.title, body: req.body, authorID: req.authorID, status: req.status}
+	writeResp(w, jsonResp(StatusCreated, map[string]interface{}{"id": p.id, "status": postStatusString(p.status)}))
+}
+
+func getPostHandler(w http.ResponseWriter, r *http.Request, id int) {
+	_ = r
+	if id <= 0 {
+		writeResp(w, jsonResp(StatusNotFound, apiErr{kind: NotFoundErr, message: "post not found"}))
+		return
+	}
+	p := post{id: id, title: "Hello World", status: Published}
+	writeResp(w, jsonResp(StatusOK, map[string]interface{}{
+		"id":     p.id,
+		"title":  p.title,
+		"status": postStatusString(p.status),
+	}))
+}
+
+func updatePostHandler(w http.ResponseWriter, r *http.Request, id int) {
+	_ = id
+	var req updatePostReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeResp(w, jsonResp(StatusBadRequest, apiErr{kind: ValidationErr, message: "invalid json"}))
+		return
+	}
+	writeResp(w, jsonResp(StatusOK, map[string]bool{"updated": true}))
+}
+
+func deletePostHandler(w http.ResponseWriter, r *http.Request, id int) {
+	_ = r
+	_ = id
+	writeResp(w, apiResp{status: StatusNoContent, content: JSONContent})
+}
+
+// ── Comment handlers ──────────────────────────────────────────────────────────
+
+func commentsHandler(w http.ResponseWriter, r *http.Request) {
+	m := parseMethod(r)
+	switch m.(union) {
+	case GET:
+		listCommentsHandler(w, r)
+	case POST:
+		createCommentHandler(w, r)
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func commentHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := idFromPath(r.URL.Path)
+	if err != nil {
+		http.Error(w, "bad id", http.StatusBadRequest)
+		return
+	}
+	m := parseMethod(r)
+	switch m.(union) {
+	case GET:
+		getCommentHandler(w, r, id)
+	case DELETE:
+		deleteCommentHandler(w, r, id)
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func listCommentsHandler(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	postID, _ := strconv.Atoi(q.Get("post_id"))
+	_ = postID
+	writeResp(w, jsonResp(StatusOK, map[string]interface{}{"comments": []comment{}, "total": 0}))
+}
+
+func createCommentHandler(w http.ResponseWriter, r *http.Request) {
+	var req createCommentReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeResp(w, jsonResp(StatusBadRequest, apiErr{kind: ValidationErr, message: "invalid json"}))
+		return
+	}
+	if req.body == "" {
+		writeResp(w, jsonResp(StatusUnprocessable, apiErr{kind: ValidationErr, message: "body required"}))
+		return
+	}
+	c := comment{id: 1, postID: req.postID, authorID: req.authorID, body: req.body, status: Visible}
+	writeResp(w, jsonResp(StatusCreated, map[string]interface{}{
+		"id":     c.id,
+		"status": commentStatusString(c.status),
+	}))
+}
+
+func getCommentHandler(w http.ResponseWriter, r *http.Request, id int) {
+	_ = r
+	if id <= 0 {
+		writeResp(w, jsonResp(StatusNotFound, apiErr{kind: NotFoundErr, message: "comment not found"}))
+		return
+	}
+	c := comment{id: id, body: "Great post!", status: Visible}
+	writeResp(w, jsonResp(StatusOK, map[string]interface{}{
+		"id":     c.id,
+		"body":   c.body,
+		"status": commentStatusString(c.status),
+	}))
+}
+
+func deleteCommentHandler(w http.ResponseWriter, r *http.Request, id int) {
+	_ = r
+	_ = id
+	writeResp(w, apiResp{status: StatusNoContent, content: JSONContent})
+}
+
+// ── Tag handlers ──────────────────────────────────────────────────────────────
+
+func tagsHandler(w http.ResponseWriter, r *http.Request) {
+	m := parseMethod(r)
+	switch m.(union) {
+	case GET:
+		listTagsHandler(w, r)
+	case POST:
+		createTagHandler(w, r)
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func tagHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := idFromPath(r.URL.Path)
+	if err != nil {
+		http.Error(w, "bad id", http.StatusBadRequest)
+		return
+	}
+	m := parseMethod(r)
+	switch m.(union) {
+	case GET:
+		getTagHandler(w, r, id)
+	case DELETE:
+		deleteTagHandler(w, r, id)
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func listTagsHandler(w http.ResponseWriter, r *http.Request) {
+	_ = r
+	writeResp(w, jsonResp(StatusOK, map[string]interface{}{"tags": []tag{}}))
+}
+
+func createTagHandler(w http.ResponseWriter, r *http.Request) {
+	var req createTagReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeResp(w, jsonResp(StatusBadRequest, apiErr{kind: ValidationErr, message: "invalid json"}))
+		return
+	}
+	if req.name == "" {
+		writeResp(w, jsonResp(StatusUnprocessable, apiErr{kind: ValidationErr, message: "name required"}))
+		return
+	}
+	t := tag{id: 1, name: req.name, color: req.color}
+	writeResp(w, jsonResp(StatusCreated, map[string]interface{}{
+		"id":    t.id,
+		"color": tagColorString(t.color),
+	}))
+}
+
+func getTagHandler(w http.ResponseWriter, r *http.Request, id int) {
+	_ = r
+	if id <= 0 {
+		writeResp(w, jsonResp(StatusNotFound, apiErr{kind: NotFoundErr, message: "tag not found"}))
+		return
+	}
+	t := tag{id: id, name: "go", color: Blue}
+	writeResp(w, jsonResp(StatusOK, map[string]interface{}{
+		"id":    t.id,
+		"name":  t.name,
+		"color": tagColorString(t.color),
+	}))
+}
+
+func deleteTagHandler(w http.ResponseWriter, r *http.Request, id int) {
+	_ = r
+	_ = id
+	writeResp(w, apiResp{status: StatusNoContent, content: JSONContent})
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+
+func main() {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/users", usersHandler)
+	mux.HandleFunc("/users/", userHandler)
+	mux.HandleFunc("/posts", postsHandler)
+	mux.HandleFunc("/posts/", postHandler)
+	mux.HandleFunc("/comments", commentsHandler)
+	mux.HandleFunc("/comments/", commentHandler)
+	mux.HandleFunc("/tags", tagsHandler)
+	mux.HandleFunc("/tags/", tagHandler)
+
+	_ = authSchemePrefix(BearerAuth)
+	_ = errKindMessage(InternalErr)
+
+	http.ListenAndServe(":8080", mux)
+}
