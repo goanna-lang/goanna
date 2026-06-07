@@ -15,6 +15,7 @@ type Variant struct {
 type SymbolTable struct {
 	Unions         map[string][]Variant // union name → ordered variants
 	VariantToUnion map[string]string    // variant name → union name
+	UsesAtom       bool                 // true if any union has atom variants
 }
 
 func Build(file *ast.File) (*SymbolTable, error) {
@@ -33,10 +34,14 @@ func Build(file *ast.File) (*SymbolTable, error) {
 				if existing, clash := tbl.VariantToUnion[name]; clash {
 					return nil, fmt.Errorf("variant %q already declared in union %q", name, existing)
 				}
+				isAtom := vg.Type == "atom"
 				v := Variant{
 					Name:        name,
 					PayloadType: vg.Type,
-					IsAtom:      vg.Type == "atom",
+					IsAtom:      isAtom,
+				}
+				if isAtom {
+					tbl.UsesAtom = true
 				}
 				variants = append(variants, v)
 				tbl.VariantToUnion[name] = decl.Name

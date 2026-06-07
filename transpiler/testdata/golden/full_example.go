@@ -1,8 +1,5 @@
 package main
 
-// TODO: This should be defined by the transpiler as a global type.
-type atom struct{}
-
 type normalConfig struct {
 	people  int
 	randNum int

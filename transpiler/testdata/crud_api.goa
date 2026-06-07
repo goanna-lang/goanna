@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-type atom struct{}
-
 // ── Union types ───────────────────────────────────────────────────────────────
 
 type httpMethod union {

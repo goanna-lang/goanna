@@ -32,6 +32,12 @@ type VariantGroup struct {
 	Type  string
 }
 
+// AtomDecl represents a "type atom struct{}" declaration in source.
+// The emitter skips it; goanna_types.go carries the definition per package.
+type AtomDecl struct{}
+
+func (AtomDecl) item() {}
+
 // UnionSwitch represents a switch statement using .(union).
 type UnionSwitch struct {
 	Line        int

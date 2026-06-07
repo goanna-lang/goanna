@@ -12,8 +12,6 @@ import (
 
 const genderBasicSrc = `package main
 
-type atom struct{}
-
 type gender union {
 	Male, Female atom
 }
@@ -33,8 +31,6 @@ func main() {
 }`
 
 const missingCaseSrc = `package main
-
-type atom struct{}
 
 type gender union {
 	Male, Female atom
@@ -178,8 +174,6 @@ func TestTranspilePreservesOpaqueText(t *testing.T) {
 // TestTranspileMultipleUnions verifies both unions are emitted.
 func TestTranspileMultipleUnions(t *testing.T) {
 	src := `package main
-
-type atom struct{}
 
 type gender union { Male, Female atom }
 type shape union { Circle, Square atom }
