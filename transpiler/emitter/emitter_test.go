@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nahmanmate/goanna/transpiler/parser"
-	"github.com/nahmanmate/goanna/transpiler/resolver"
+	"github.com/nahmanmate/goanna/parser"
+	"github.com/nahmanmate/goanna/resolver"
 )
 
 var updateGolden = flag.Bool("update", false, "update golden files")

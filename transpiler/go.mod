@@ -1,4 +1,4 @@
-module github.com/nahmanmate/goanna/transpiler
+module github.com/nahmanmate/goanna
 
 go 1.26.2
 

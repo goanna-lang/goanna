@@ -3,7 +3,7 @@ package resolver
 import (
 	"fmt"
 
-	"github.com/nahmanmate/goanna/transpiler/ast"
+	"github.com/nahmanmate/goanna/ast"
 )
 
 type Variant struct {

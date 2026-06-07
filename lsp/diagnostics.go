@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/nahmanmate/goanna/transpiler/checker"
+	"github.com/nahmanmate/goanna/checker"
 )
 
 // Position is an LSP zero-indexed line/character position.

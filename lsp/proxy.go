@@ -7,7 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/nahmanmate/goanna/transpiler/pipeline"
+	"github.com/nahmanmate/goanna/pipeline"
 )
 
 // pendingRequest tracks a forwarded request awaiting a gopls response.
