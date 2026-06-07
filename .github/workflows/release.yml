@@ -58,10 +58,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add lsp/go.mod lsp/go.sum
-          git commit -m "chore: pin lsp dependency to ${VERSION}"
-          git push
-          git tag "lsp/${VERSION}"
-          git push origin "lsp/${VERSION}"
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: pin lsp dependency to ${VERSION}"
+            git push
+          fi
+          if ! git ls-remote --exit-code --tags origin "lsp/${VERSION}" > /dev/null 2>&1; then
+            git tag "lsp/${VERSION}"
+            git push origin "lsp/${VERSION}"
+          fi
 
   build:
     name: Build (${{ matrix.goos }}/${{ matrix.goarch }})
