@@ -190,6 +190,57 @@ type shape union { Circle, Square atom }
 	}
 }
 
+// TestTranspile_withGofmt verifies Transpile produces valid formatted Go when EnableGofmt is set.
+func TestTranspile_withGofmt(t *testing.T) {
+	resetFormatter(t)
+	EnableGofmt()
+	var buf bytes.Buffer
+	if err := Transpile([]byte(genderBasicSrc), "test", &buf); err != nil {
+		t.Fatalf("Transpile: %v", err)
+	}
+	got := buf.String()
+	if !strings.Contains(got, "isGender()") {
+		t.Errorf("output missing isGender(): %s", got)
+	}
+	// Formatted output must still parse as valid Go.
+	fset := token.NewFileSet()
+	if _, err := goparser.ParseFile(fset, "", got, goparser.AllErrors); err != nil {
+		t.Errorf("gofmt output is not valid Go: %v\n%s", err, got)
+	}
+}
+
+// TestTranspileEx_withGofmt verifies TranspileEx produces valid formatted Go when EnableGofmt is set.
+func TestTranspileEx_withGofmt(t *testing.T) {
+	resetFormatter(t)
+	EnableGofmt()
+	var buf bytes.Buffer
+	usesAtom, _, err := TranspileEx([]byte(genderBasicSrc), "test", &buf)
+	if err != nil {
+		t.Fatalf("TranspileEx: %v", err)
+	}
+	if !usesAtom {
+		t.Error("expected usesAtom true for union type")
+	}
+	fset := token.NewFileSet()
+	if _, err := goparser.ParseFile(fset, "", buf.String(), goparser.AllErrors); err != nil {
+		t.Errorf("gofmt output is not valid Go: %v\n%s", err, buf.String())
+	}
+}
+
+// TestTranspile_noFormatter verifies that without a formatter the raw emitted Go is still parseable.
+func TestTranspile_noFormatter(t *testing.T) {
+	resetFormatter(t)
+	// formatterEnabled is false — no formatter set.
+	var buf bytes.Buffer
+	if err := Transpile([]byte(genderBasicSrc), "test", &buf); err != nil {
+		t.Fatalf("Transpile: %v", err)
+	}
+	fset := token.NewFileSet()
+	if _, err := goparser.ParseFile(fset, "", buf.String(), goparser.AllErrors); err != nil {
+		t.Errorf("unformatted output is not valid Go: %v\n%s", err, buf.String())
+	}
+}
+
 // FuzzTranspile ensures the pipeline never panics on arbitrary input.
 func FuzzTranspile(f *testing.F) {
 	seeds := []string{

@@ -23,6 +23,8 @@ var (
 // EnableGofmt configures emitted files to be formatted with go/format.
 func EnableGofmt() {
 	formatterEnabled = true
+	useGofumpt = false
+	gofumptExe = ""
 }
 
 // EnableGofumpt configures emitted files to be formatted with gofumpt.
