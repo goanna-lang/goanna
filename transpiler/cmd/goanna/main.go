@@ -18,9 +18,11 @@ import (
 
 // transpile subcommand (default when no subcommand given)
 var cli struct {
-	Files  []string `arg:"" optional:"" help:"Input .goa files. Reads stdin if none given."`
-	Output string   `short:"o" help:"Output file. Defaults to <input>.go (strips .union). Use - for stdout."`
-	Check  bool     `help:"Validate only; do not emit output."`
+	Files   []string `arg:"" optional:"" help:"Input .goa files. Reads stdin if none given."`
+	Output  string   `short:"o" help:"Output file. Defaults to <input>.go (strips .union). Use - for stdout."`
+	Check   bool     `help:"Validate only; do not emit output."`
+	Fmt     bool     `name:"fmt" help:"Format output with gofmt."`
+	Gofumpt bool     `name:"gofumpt" help:"Format output with gofumpt (supersedes --fmt)."`
 }
 
 // default set below but actual version is inserted by CI from release tag
@@ -48,7 +50,13 @@ func main() {
 	}
 
 	kong.Parse(&cli)
-	pipeline.InitFormatter()
+
+	switch {
+	case cli.Gofumpt:
+		pipeline.EnableGofumpt()
+	case cli.Fmt:
+		pipeline.EnableGofmt()
+	}
 
 	if len(cli.Files) == 0 {
 		var buf bytes.Buffer
@@ -116,9 +124,7 @@ func processFile(input string, goannaDirs map[string]bool) error {
 
 // runBuild handles: goanna build [--keep] [--check] [patterns...]
 func runBuild(args []string) error {
-	pipeline.InitFormatter()
-
-	var keep, check bool
+	var keep, check, fmtFlag, gofumptFlag bool
 	var patterns []string
 
 	for _, a := range args {
@@ -127,9 +133,20 @@ func runBuild(args []string) error {
 			keep = true
 		case "--check":
 			check = true
+		case "--fmt":
+			fmtFlag = true
+		case "--gofumpt":
+			gofumptFlag = true
 		default:
 			patterns = append(patterns, a)
 		}
+	}
+
+	switch {
+	case gofumptFlag:
+		pipeline.EnableGofumpt()
+	case fmtFlag:
+		pipeline.EnableGofmt()
 	}
 	if len(patterns) == 0 {
 		patterns = []string{"./..."}

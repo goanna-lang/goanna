@@ -15,13 +15,21 @@ const (
 )
 
 var (
-	useGofumpt bool
-	gofumptExe string
+	formatterEnabled bool
+	useGofumpt       bool
+	gofumptExe       string
 )
 
-// InitFormatter checks for gofumpt and, if absent, prompts the user to install it.
-// Call once at CLI startup before any transpilation begins.
-func InitFormatter() {
+// EnableGofmt configures emitted files to be formatted with go/format.
+func EnableGofmt() {
+	formatterEnabled = true
+}
+
+// EnableGofumpt configures emitted files to be formatted with gofumpt.
+// If gofumpt is not found, the user is prompted to install it; on failure or
+// refusal, falls back to go/format.
+func EnableGofumpt() {
+	formatterEnabled = true
 	if path, err := exec.LookPath("gofumpt"); err == nil {
 		useGofumpt, gofumptExe = true, path
 		return
@@ -34,7 +42,7 @@ func InitFormatter() {
 		}
 	}
 
-	fmt.Fprint(os.Stderr, "gofumpt not found. Install it for better formatting? [y/N] ")
+	fmt.Fprint(os.Stderr, "gofumpt not found. Install it? [y/N] ")
 	var resp string
 	fmt.Fscan(os.Stdin, &resp)
 	if strings.ToLower(strings.TrimSpace(resp)) != "y" {
@@ -62,6 +70,9 @@ func InitFormatter() {
 }
 
 func formatEmitted(src []byte, name string) ([]byte, error) {
+	if !formatterEnabled {
+		return src, nil
+	}
 	if useGofumpt {
 		cmd := exec.Command(gofumptExe)
 		cmd.Stdin = bytes.NewReader(src)
