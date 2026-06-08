@@ -44,6 +44,10 @@ func EnableGofumpt() {
 		}
 	}
 
+	// Don't prompt if stdin is not a terminal — it may carry source to transpile.
+	if fi, err := os.Stdin.Stat(); err != nil || (fi.Mode()&os.ModeCharDevice) == 0 {
+		return
+	}
 	fmt.Fprint(os.Stderr, "gofumpt not found. Install it? [y/N] ")
 	var resp string
 	if _, err := fmt.Fscan(os.Stdin, &resp); err != nil {

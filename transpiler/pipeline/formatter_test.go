@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"bytes"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -97,6 +98,33 @@ func TestEnableGofumpt_decline(t *testing.T) {
 	}
 }
 
+func TestEnableGofumpt_pipedStdin(t *testing.T) {
+	resetFormatter(t)
+	// Hide gofumpt so the install-prompt path would normally fire.
+	t.Setenv("PATH", "/nonexistent")
+	t.Setenv("GOPATH", t.TempDir())
+	// Simulate piped source: `cat foo.goa | goanna --gofumpt`
+	mockStdin(t, "package main\nfunc main() {}\n")
+
+	EnableGofumpt()
+
+	// Should fall back to gofmt without touching stdin.
+	if !formatterEnabled {
+		t.Error("formatterEnabled should be set (fallback to gofmt)")
+	}
+	if useGofumpt {
+		t.Error("useGofumpt should not be set when stdin is a pipe")
+	}
+	// Piped source must still be readable — not consumed by the prompt.
+	remaining, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(remaining) == 0 {
+		t.Error("stdin was consumed by EnableGofumpt; piped source would be lost")
+	}
+}
+
 func TestFormatEmitted_disabled(t *testing.T) {
 	resetFormatter(t)
 	formatterEnabled = false
@@ -156,6 +184,9 @@ func TestFormatEmitted_gofumpt(t *testing.T) {
 	got, err := formatEmitted(src, "test")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if bytes.Equal(got, src) {
+		t.Error("expected gofumpt to normalise formatting")
 	}
 	if !strings.Contains(string(got), "func main()") {
 		t.Errorf("gofumpt output missing func main(): %s", got)
