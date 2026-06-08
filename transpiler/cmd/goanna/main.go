@@ -48,6 +48,7 @@ func main() {
 	}
 
 	kong.Parse(&cli)
+	pipeline.InitFormatter()
 
 	if len(cli.Files) == 0 {
 		var buf bytes.Buffer
@@ -115,6 +116,8 @@ func processFile(input string, goannaDirs map[string]bool) error {
 
 // runBuild handles: goanna build [--keep] [--check] [patterns...]
 func runBuild(args []string) error {
+	pipeline.InitFormatter()
+
 	var keep, check bool
 	var patterns []string
 
