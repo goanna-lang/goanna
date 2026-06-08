@@ -85,8 +85,8 @@ goanna build ./...
 Transpiles all `.goa` files in the module to a temp directory and passes them to `go build` via `-overlay`. Source tree stays clean — no generated files written to disk.
 
 ```sh
-goanna build --keep ./...   # write generated .go files alongside source
-goanna build ./pkg/...      # specific subtree only
+goanna build --keep ./...      # write generated .go files alongside source
+goanna build ./pkg/...         # specific subtree only
 ```
 
 ### Transpile only (no build)
@@ -101,9 +101,25 @@ cat foo.goa | goanna        # stdin → stdout
 ### Validate without emitting output
 
 ```sh
-goanna --check foo.goa      # single file
-goanna build --check ./...       # validate all .goa files in module
+goanna --check foo.goa         # single file
+goanna build --check ./...     # validate all .goa files in module
 ```
+
+### Formatting
+
+Output is not formatted by default. Pass `--fmt` or `--gofumpt` to opt in. Both flags work with the direct transpile command and `goanna build`.
+
+```sh
+# gofmt (go/format)
+goanna --fmt foo.goa
+goanna build --fmt ./...
+
+# gofumpt — stricter formatting, superset of gofmt
+goanna --gofumpt foo.goa
+goanna build --gofumpt ./...
+```
+
+If `gofumpt` is not installed when `--gofumpt` is passed, goanna prompts to install it via `go install`. On refusal or install failure, output falls back to `go/format`.
 
 ### CI / GitHub Actions
 
@@ -194,15 +210,15 @@ See [`lsp/README.md`](lsp/README.md) for editor configuration, features, and arc
 ## How it works
 
 ```
-.goa  →  parser  →  resolver  →  checker  →  emitter  →  go/format  →  .go
+.goa  →  parser  →  resolver  →  checker  →  emitter  →  [formatter]  →  .go
 ```
 
 1. **Parser** — custom parser handles the `union` keyword and `.(union)` syntax; everything else is passed through verbatim
 2. **Resolver** — builds a symbol table mapping variant names to their union types
 3. **Checker** — validates exhaustiveness of every `.(union)` switch
 4. **Emitter** — rewrites union declarations and switches to idiomatic Go
-5. **Formatter** — runs `go/format` on the output
+5. **Formatter** — optional; off by default. `--fmt` runs `go/format`, `--gofumpt` runs gofumpt
 
 The generated code uses only standard Go — sealed interfaces, unexported wrapper structs, and type switches. No runtime dependency on Goanna.
 
-The LSP proxy (`goanna-lsp`) runs the same pipeline in-memory on every edit, skipping `go/format`, and maps positions back to the source file so the editor never sees the generated code.
+The LSP proxy (`goanna-lsp`) runs the same pipeline in-memory on every edit, without formatting, and maps positions back to the source file so the editor never sees the generated code.
