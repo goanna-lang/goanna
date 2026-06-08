@@ -2,7 +2,6 @@ package pipeline
 
 import (
 	"fmt"
-	"go/format"
 	goparser "go/parser"
 	"go/token"
 	"io"
@@ -62,9 +61,9 @@ func TranspileEx(src []byte, name string, w io.Writer) (usesAtom bool, pkgName s
 		return false, "", fmt.Errorf("%s: emit: %w", name, err)
 	}
 
-	formatted, err := format.Source([]byte(raw))
+	formatted, err := formatEmitted([]byte(raw), name)
 	if err != nil {
-		return false, "", fmt.Errorf("%s: format: %w\n--- unformatted ---\n%s", name, err, raw)
+		return false, "", err
 	}
 
 	if _, err = w.Write(formatted); err != nil {
@@ -111,10 +110,9 @@ func Transpile(src []byte, name string, w io.Writer) error {
 		return fmt.Errorf("%s: emit: %w", name, err)
 	}
 
-	formatted, err := format.Source([]byte(raw))
+	formatted, err := formatEmitted([]byte(raw), name)
 	if err != nil {
-		// Surface the unformatted source to aid debugging.
-		return fmt.Errorf("%s: format: %w\n--- unformatted ---\n%s", name, err, raw)
+		return err
 	}
 
 	_, err = w.Write(formatted)
