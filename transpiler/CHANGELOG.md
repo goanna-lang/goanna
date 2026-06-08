@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0](https://github.com/nahmanmate/goanna/compare/v1.1.1...v1.2.0) (2026-06-08)
+
+
+### Features
+
+* default behaviour is transpiled code is not formatted ([409b5cd](https://github.com/nahmanmate/goanna/commit/409b5cdf893cbbcfb98d38a65c5ebb23795256f9))
+* improved formatter options ([0291059](https://github.com/nahmanmate/goanna/commit/0291059558b0fe50affc16067ab700da400177d8))
+
+
+### Bug Fixes
+
+* **formatter:** skip install prompt when stdin is a pipe ([f8f5f12](https://github.com/nahmanmate/goanna/commit/f8f5f12dabf1cc91e8b3ed21e188d7e318b44ccf))
+* unchecked errors now handled ([dc072b9](https://github.com/nahmanmate/goanna/commit/dc072b9176cc69d27b8644d62c425cf55a135e17))
+
 ## [1.1.1](https://github.com/nahmanmate/goanna/compare/v1.1.0...v1.1.1) (2026-06-07)
 
 
