@@ -63,8 +63,16 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add lsp/go.mod lsp/go.sum
           if ! git diff --cached --quiet; then
+            BRANCH="chore/pin-lsp-${VERSION}"
+            git checkout -b "$BRANCH"
             git commit -m "chore: pin lsp dependency to ${VERSION}"
-            git push
+            git push origin "$BRANCH"
+            gh pr create \
+              --title "chore: pin lsp dependency to ${VERSION}" \
+              --body "Auto-generated: pin lsp dependency to transpiler ${VERSION}" \
+              --base main \
+              --head "$BRANCH"
+            gh pr merge "$BRANCH" --auto --squash --delete-branch
           fi
           if ! git ls-remote --exit-code --tags origin "lsp/${VERSION}" > /dev/null 2>&1; then
             git tag "lsp/${VERSION}"
