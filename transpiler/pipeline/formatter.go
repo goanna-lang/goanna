@@ -46,7 +46,9 @@ func EnableGofumpt() {
 
 	fmt.Fprint(os.Stderr, "gofumpt not found. Install it? [y/N] ")
 	var resp string
-	fmt.Fscan(os.Stdin, &resp)
+	if _, err := fmt.Fscan(os.Stdin, &resp); err != nil {
+		return // unreadable stdin — treat as declining
+	}
 	if strings.ToLower(strings.TrimSpace(resp)) != "y" {
 		return
 	}

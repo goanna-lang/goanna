@@ -33,10 +33,12 @@ func mockStdin(t *testing.T, data string) {
 	if _, err := w.WriteString(data); err != nil {
 		t.Fatal(err)
 	}
-	w.Close()
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
 	orig := os.Stdin
 	os.Stdin = r
-	t.Cleanup(func() { os.Stdin = orig; r.Close() })
+	t.Cleanup(func() { os.Stdin = orig; _ = r.Close() })
 }
 
 func TestEnableGofmt(t *testing.T) {
@@ -83,7 +85,7 @@ func TestEnableGofumpt_decline(t *testing.T) {
 	}
 	origStderr := os.Stderr
 	os.Stderr = devNull
-	t.Cleanup(func() { os.Stderr = origStderr; devNull.Close() })
+	t.Cleanup(func() { os.Stderr = origStderr; _ = devNull.Close() })
 
 	EnableGofumpt()
 
