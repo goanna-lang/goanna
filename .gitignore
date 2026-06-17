@@ -4,3 +4,6 @@ transpiler/full_example
 # transpiler binary
 transpiler/cmd/goanna/goanna
 transpiler/cmd/goanna/goanna.exe
+
+# issues
+.issues/
