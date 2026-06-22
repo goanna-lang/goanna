@@ -45,7 +45,7 @@ jobs:
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version-file: transpiler/go.mod
-          cache-dependency-path: transpiler/go.sum
+          cache: false
 
       - name: Pin transpiler version and tag LSP
         env:
@@ -100,7 +100,7 @@ jobs:
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version-file: transpiler/go.mod
-          cache-dependency-path: transpiler/go.sum
+          cache: false
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
@@ -128,7 +128,7 @@ jobs:
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version-file: lsp/go.mod
-          cache-dependency-path: lsp/go.sum
+          cache: false
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
