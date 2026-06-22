@@ -4,3 +4,5 @@ use (
 	./transpiler
 	./lsp
 )
+
+replace github.com/goanna-lang/goanna/transpiler v1.2.0 => ./transpiler
