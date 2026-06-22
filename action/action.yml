@@ -45,7 +45,7 @@ runs:
       shell: bash
       env:
         GOANNA_VERSION: ${{ inputs.version }}
-      run: go install "github.com/nahmanmate/goanna/cmd/goanna@${GOANNA_VERSION}"
+      run: go install "github.com/goanna-lang/goanna/transpiler/cmd/goanna@${GOANNA_VERSION}"
 
     - name: Run goanna (check)
       if: inputs.mode == 'check'

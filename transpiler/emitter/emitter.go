@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nahmanmate/goanna/transpiler/ast"
-	"github.com/nahmanmate/goanna/transpiler/resolver"
+	"github.com/goanna-lang/goanna/transpiler/ast"
+	"github.com/goanna-lang/goanna/transpiler/resolver"
 )
 
 // ItemLineRange records the 0-indexed line range an item occupies in emitter output.
