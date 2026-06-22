@@ -3,8 +3,8 @@ package lsp
 import (
 	"bytes"
 
-	"github.com/nahmanmate/goanna/transpiler/ast"
-	"github.com/nahmanmate/goanna/transpiler/emitter"
+	"github.com/goanna-lang/goanna/transpiler/ast"
+	"github.com/goanna-lang/goanna/transpiler/emitter"
 )
 
 // SourceMap maps lines between .goa source and raw emitter output.

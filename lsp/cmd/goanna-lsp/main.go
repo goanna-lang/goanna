@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nahmanmate/goanna/lsp"
+	"github.com/goanna-lang/goanna/lsp"
 )
 
 var version = "dev"

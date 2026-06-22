@@ -8,11 +8,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/nahmanmate/goanna/transpiler/ast"
-	"github.com/nahmanmate/goanna/transpiler/checker"
-	"github.com/nahmanmate/goanna/transpiler/emitter"
-	"github.com/nahmanmate/goanna/transpiler/parser"
-	"github.com/nahmanmate/goanna/transpiler/resolver"
+	"github.com/goanna-lang/goanna/transpiler/ast"
+	"github.com/goanna-lang/goanna/transpiler/checker"
+	"github.com/goanna-lang/goanna/transpiler/emitter"
+	"github.com/goanna-lang/goanna/transpiler/parser"
+	"github.com/goanna-lang/goanna/transpiler/resolver"
 )
 
 // TranspileFile reads inputPath, transpiles it, and writes valid Go to w.
