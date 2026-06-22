@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/goanna-lang/goanna/compare/v0.2.0...v0.2.1) (2026-06-22)
+
+
+### Miscellaneous Chores
+
+* trigger release-please for 0.2.1 ([688b501](https://github.com/goanna-lang/goanna/commit/688b501466fdd843bc08e8a307ae7d6ab04ac4f0))
+
 ## [0.2.0](https://github.com/goanna-lang/goanna/compare/v0.1.0...v0.2.0) (2026-06-22)
 
 
