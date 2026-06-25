@@ -69,7 +69,7 @@ default:
 ## Installation
 
 ```sh
-go install github.com/nahmanmate/goanna/cmd/goanna@latest
+go install github.com/goanna-lang/goanna/transpiler/cmd/goanna@latest
 ```
 
 ---
@@ -199,7 +199,7 @@ default: // ok — not all cases required
 `goanna-lsp` is a language server proxy that adds Goanna intelligence to any editor already running `gopls`. It handles `.goa` files transparently — diagnostics, completions, go-to-definition, and hover all work against your source, not the generated code.
 
 ```sh
-go install github.com/nahmanmate/goanna/lsp/cmd/goanna-lsp@latest
+go install github.com/goanna-lang/goanna/lsp/cmd/goanna-lsp@latest
 goanna-lsp          # reads stdin, writes stdout — standard LSP stdio transport
 ```
 
